@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "974273655835",
+    "project_id": "roamify-c0130",
+    "storage_bucket": "roamify-c0130.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:974273655835:android:dda252d0f656bb44ae74be",
+        "android_client_info": {
+          "package_name": "com.example.roamify"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAB3igm4SFcKsIFtxaTgnAKwD2mhlwyiBg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
