@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:project/screens/post_bottom_bar.dart';
+import 'package:roamify/screens/post_bottom_bar.dart';
 
 class PostScreen extends StatelessWidget {
   final String cityName;

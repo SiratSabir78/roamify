@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:roamify/screens/loginPage.dart';
+import 'package:roamify/screens/login_screen.dart';
 import 'package:roamify/screens/welcome_screen.dart';
 
 class Wrapper extends StatefulWidget {
