@@ -13,9 +13,49 @@ class LoginPage extends StatefulWidget {
 class _LoginState extends State<LoginPage> {
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
+
   signIn() async {
-    await FirebaseAuth.instance
-        .signInWithEmailAndPassword(email: email.text, password: password.text);
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email.text, password: password.text);
+      // If successful, navigate to the next screen or show a success message
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text("No Account Found"),
+              content: const Text(
+                  "It seems like you don't have an account. Would you like to sign up for one?"),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Get.to(const SignUp());
+                  },
+                  child: const Text("Sign Up"),
+                ),
+              ],
+            );
+          },
+        );
+      } else if (e.code == 'wrong-password') {
+        // Handle wrong password case
+        Get.snackbar("Error", "Wrong password provided for that user.",
+            backgroundColor: Colors.red, colorText: Colors.white);
+      } else {
+        // Handle other errors
+        Get.snackbar("Error", e.message.toString(),
+            backgroundColor: Colors.red, colorText: Colors.white);
+      }
+    }
   }
 
   @override
@@ -23,7 +63,7 @@ class _LoginState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Login"),
-        backgroundColor: Color.fromARGB(255, 242, 219, 248),
+        backgroundColor: const Color.fromARGB(255, 242, 219, 248),
         centerTitle: true,
       ),
       body: Padding(
