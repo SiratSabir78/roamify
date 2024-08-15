@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:roamify/screens/home_screen.dart';
 import 'package:roamify/screens/login_screen.dart';
 import 'package:roamify/screens/signup_screen.dart';
 
@@ -50,94 +51,28 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 30),
-                  // InkWell(
-                  //   onTap: () {
-                  //     Navigator.push(
-                  //         context,
-                  //         MaterialPageRoute(
-                  //           builder: (context) => HomePage(),
-                  //         ));
-                  //   },
-                  //   child: Ink(
-                  //     padding: EdgeInsets.all(15),
-                  //     decoration: BoxDecoration(
-                  //       color: Colors.white,
-                  //       borderRadius: BorderRadius.circular(12),
-                  //     ),
-                  //     child: Icon(
-                  //       Icons.arrow_forward_ios,
-                  //       color: Colors.black,
-                  //       size: 20,
-                  //     ),
-                  //   ),
-                  // ),
                   InkWell(
                     onTap: () {
                       Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => SignUp()),
-                      );
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HomePage(),
+                          ));
                     },
                     child: Ink(
-                      padding: const EdgeInsets.all(15),
+                      padding: EdgeInsets.all(15),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Icon(
-                            Icons.how_to_reg,
-                            color: Colors.black,
-                            size: 20,
-                          ),
-                          SizedBox(width: 8), // Spacing between icon and text
-                          Text(
-                            "Sign Up",
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
+                      child: Icon(
+                        Icons.arrow_forward_ios,
+                        color: Colors.black,
+                        size: 20,
                       ),
                     ),
                   ),
                   SizedBox(height: 20),
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => LoginPage()),
-                      );
-                    },
-                    child: Ink(
-                      padding: const EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Icon(
-                            Icons.account_circle,
-                            color: Colors.black,
-                            size: 20,
-                          ),
-                          SizedBox(width: 8), // Spacing between icon and text
-                          Text(
-                            "Sign In",
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
