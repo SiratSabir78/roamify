@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:roamify/screens/home_screen.dart';
-import 'package:roamify/screens/login_screen.dart';
-import 'package:roamify/screens/signup_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});

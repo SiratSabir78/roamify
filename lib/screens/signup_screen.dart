@@ -11,75 +11,98 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
-  TextEditingController email = TextEditingController();
-  TextEditingController password = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
-  signup() async {
-    await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email.text, password: password.text);
-    Get.offAll(const Wrapper());
+  Future<void> signup() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        );
+        Get.offAll(const Wrapper());
+      } catch (e) {
+        Get.snackbar(
+          'Sign Up Error',
+          e.toString(),
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    }
+  }
+
+  String? validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your email';
+    } else if (!value.endsWith('@gmail.com')) {
+      return 'Email must end with @gmail.com';
+    }
+    return null;
+  }
+
+  String? validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your password';
+    } else if (value.length < 6) {
+      return 'Password must be at least 6 characters long';
+    }
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Sign Up"),
-        backgroundColor: const Color.fromARGB(255, 242, 219, 248),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text("Sign Up Page")),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              height: 200,
-              width: 200,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage("images/Roamify.png"),
-                  fit: BoxFit.cover,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: emailController,
+                decoration: const InputDecoration(
+                  hintText: 'Enter Email',
+                  prefixIcon: Icon(Icons.email),
                 ),
+                validator: validateEmail,
               ),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: email,
-              decoration: InputDecoration(
-                hintText: 'Enter Email',
-                prefixIcon: const Icon(Icons.email),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20.0),
+              TextFormField(
+                controller: passwordController,
+                decoration: const InputDecoration(
+                  hintText: 'Enter Password',
+                  prefixIcon: Icon(Icons.lock),
                 ),
+                obscureText: true,
+                validator: validatePassword,
               ),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: password,
-              obscureText: true,
-              decoration: InputDecoration(
-                hintText: 'Enter Password',
-                prefixIcon: const Icon(Icons.lock),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20.0),
+              SizedBox(height: 40.0),
+              ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(Colors.blue),
+                  foregroundColor:
+                      MaterialStateProperty.all<Color>(Colors.white),
+                  elevation: MaterialStateProperty.all<double>(8.0),
+                  padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                    const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 12.0),
+                  ),
+                  shape: MaterialStateProperty.all<OutlinedBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                  ),
                 ),
+                onPressed: signup,
+                child: const Text("Sign Up"),
               ),
-            ),
-            const SizedBox(height: 40),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0, vertical: 12.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                backgroundColor: const Color.fromARGB(255, 242, 219, 248),
-              ),
-              onPressed: (() => signup()),
-              child: const Text("Sign Up"),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

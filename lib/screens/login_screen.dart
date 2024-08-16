@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:roamify/screens/signup_screen.dart';
+import 'package:roamify/screens/wrapper.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,50 +12,46 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginState extends State<LoginPage> {
-  TextEditingController email = TextEditingController();
-  TextEditingController password = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  signIn() async {
+  bool _isLoading = false;
+
+  Future<void> signIn() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: email.text, password: password.text);
-      // If successful, navigate to the next screen or show a success message
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text("No Account Found"),
-              content: const Text(
-                  "It seems like you don't have an account. Would you like to sign up for one?"),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text("Cancel"),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    Get.to(const SignUp());
-                  },
-                  child: const Text("Sign Up"),
-                ),
-              ],
-            );
-          },
-        );
-      } else if (e.code == 'wrong-password') {
-        // Handle wrong password case
-        Get.snackbar("Error", "Wrong password provided for that user.",
-            backgroundColor: Colors.red, colorText: Colors.white);
+      await _auth.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      if (_auth.currentUser != null) {
+        Get.offAll(() => const Wrapper());
       } else {
-        // Handle other errors
-        Get.snackbar("Error", e.message.toString(),
-            backgroundColor: Colors.red, colorText: Colors.white);
+        Get.snackbar(
+          'Login Error',
+          'User login failed. Please try again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
+    } catch (e) {
+      Get.snackbar(
+        'Login Error',
+        e.toString(),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -83,7 +80,7 @@ class _LoginState extends State<LoginPage> {
             ),
             const SizedBox(height: 20),
             TextField(
-              controller: email,
+              controller: emailController,
               decoration: InputDecoration(
                 hintText: 'Enter Email',
                 prefixIcon: const Icon(Icons.email),
@@ -94,7 +91,7 @@ class _LoginState extends State<LoginPage> {
             ),
             const SizedBox(height: 20),
             TextField(
-              controller: password,
+              controller: passwordController,
               obscureText: true,
               decoration: InputDecoration(
                 hintText: 'Enter Password',
@@ -114,12 +111,14 @@ class _LoginState extends State<LoginPage> {
                 ),
                 backgroundColor: const Color.fromARGB(255, 242, 219, 248),
               ),
-              onPressed: (() => signIn()),
-              child: const Text("Login"),
+              onPressed: _isLoading ? null : signIn,
+              child: _isLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text("Login"),
             ),
             const SizedBox(height: 20),
             TextButton(
-              onPressed: () => Get.to(const SignUp()),
+              onPressed: () => Get.to(() => const SignUp()),
               child: const Text(
                 "Don't have an account? Sign Up",
                 style: TextStyle(color: Color.fromARGB(255, 221, 128, 244)),
