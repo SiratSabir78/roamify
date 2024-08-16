@@ -15,9 +15,48 @@ class _SignUpState extends State<SignUp> {
   TextEditingController password = TextEditingController();
 
   signup() async {
-    await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email.text, password: password.text);
-    Get.offAll(const Wrapper());
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: email.text, password: password.text);
+      Get.offAll(const Wrapper());
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') {
+        Get.snackbar(
+          "Error",
+          "The email address is already in use by another account.",
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      } else if (e.code == 'invalid-email') {
+        Get.snackbar(
+          "Error",
+          "The email address is not valid.",
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      } else if (e.code == 'weak-password') {
+        Get.snackbar(
+          "Error",
+          "The password is too weak.",
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      } else {
+        Get.snackbar(
+          "Error",
+          "An unexpected error occurred: ${e.message}",
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        "Error",
+        "An unexpected error occurred: $e",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
   }
 
   @override
@@ -76,7 +115,7 @@ class _SignUpState extends State<SignUp> {
                 ),
                 backgroundColor: const Color.fromARGB(255, 242, 219, 248),
               ),
-              onPressed: (() => signup()),
+              onPressed: signup,
               child: const Text("Sign Up"),
             ),
           ],
