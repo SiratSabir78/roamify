@@ -16,6 +16,7 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    print("inside main");
     return const GetMaterialApp(
       home: Wrapper(),
     );
