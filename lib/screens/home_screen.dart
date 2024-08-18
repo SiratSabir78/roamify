@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:roamify/Widgets/home_app_bar.dart';
-import 'package:roamify/widgets/home_botton_bar.dart';
-import 'package:roamify/screens/booking_page.dart';
-import 'package:roamify/screens/post_screen.dart';
+import 'package:roamify/Widgets/home_botton_bar.dart';
+import 'booking_page.dart';
+import 'post_screen.dart';
 
 class Booking {
   String id;
@@ -34,9 +34,8 @@ class Booking {
     );
   }
 }
-
 class HomePage extends StatelessWidget {
-  final List<String> catagory = [
+  final List<String> category = [
     'Best Places',
     'Most Visited',
     'Favourites',
@@ -44,6 +43,8 @@ class HomePage extends StatelessWidget {
     'Hotels',
     'Restaurants'
   ];
+
+
 
   final List<String> cities = [
     'Paris, France',
@@ -55,12 +56,12 @@ class HomePage extends StatelessWidget {
   ];
 
   final List<String> descriptions = [
-    'Paris is a global center for art, fashion, gastronomy, and culture. The city is home to some of the world\'s most famous landmarks, including the Eiffel Tower, Notre Dame Cathedral, and the Arc de Triomphe. The Louvre Museum, housing the Mona Lisa, is also a major attraction.',
-    'Switzerland is renowned for its stunning landscapes, with the Swiss Alps offering some of the most beautiful scenery in the world. The country is also famous for its charming cities, delicious chocolate, and high-quality watches.',
-    'Stockholm, the capital of Sweden, boasts an array of enchanting tourism spots. The historic Gamla Stan (Old Town) captivates with its cobblestone streets, colorful buildings, and the Royal Palace. The Vasa Museum showcases a beautifully preserved 17th-century warship, while the Skansen open-air museum offers a glimpse into Swedish history and culture.',
-    'Berlin is rich in historical and cultural tourism spots. The iconic Brandenburg Gate stands as a symbol of unity and peace. The impressive Reichstag Building, with its glass dome, provides panoramic views of the city. Additionally, the bustling Alexanderplatz and the serene Tiergarten Park cater to diverse visitor interests, making Berlin a dynamic and captivating destination for tourists.',
-    'Amsterdam is famous for its picturesque canals, vibrant cultural scene, and historic architecture. The city offers numerous museums, including the Van Gogh Museum and Anne Frank House, as well as charming neighborhoods like the Jordaan.',
-    'Baku, the capital of Azerbaijan, offers a rich tapestry of tourism spots that captivate visitors with its unique blend of ancient and modern attractions. The historical Icherisheher, or Old City, invites exploration with its narrow alleys, Maiden Tower, and the Palace of the Shirvanshahs, reflecting centuries-old architecture. Contrasting this is the contemporary splendor of the Flame Towers, which illuminate the skyline with their distinctive design.'
+    'Paris is a global center for art, fashion, gastronomy, and culture...',
+    'Switzerland is renowned for its stunning landscapes...',
+    'Stockholm, the capital of Sweden, boasts an array of enchanting tourism spots...',
+    'Berlin is rich in historical and cultural tourism spots...',
+    'Amsterdam is famous for its picturesque canals...',
+    'Baku, the capital of Azerbaijan, offers a rich tapestry of tourism spots...'
   ];
 
   HomePage({super.key});
@@ -71,6 +72,59 @@ class HomePage extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(90.0),
         child: HomeAppBar(),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              child: Icon(
+                Icons.person,
+                size: 80,
+                color: Colors.white,
+              ),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: <Color>[
+                    Color.fromARGB(255, 242, 219, 248), // Light purple
+                    Color.fromARGB(245, 232, 209, 238), // Light pink
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+            ),
+            ListTile(
+              trailing: Icon(Icons.settings),
+              title: Text('Person Settings'),
+              onTap: () {
+                // Handle person settings tap
+              },
+            ),
+            ListTile(
+              trailing: Icon(Icons.app_settings_alt),
+              title: Text('App Settings'),
+              onTap: () {
+                // Handle app settings tap
+              },
+            ),
+            ListTile(
+              trailing: Icon(Icons.info),
+              title: Text('Travel Info'),
+              onTap: () {
+                // Handle travel info tap
+              },
+            ),
+            ListTile(
+              trailing: Icon(Icons.reviews),
+              title: Text('Reviews'),
+              onTap: () {
+                
+                // Handle reviews tap
+              },
+            ),
+          ],
+        ),
       ),
       body: SafeArea(
         child: Padding(
@@ -154,7 +208,7 @@ class HomePage extends StatelessWidget {
                     padding: EdgeInsets.all(8),
                     child: Row(
                       children: [
-                        for (int i = 0; i < catagory.length; i++)
+                        for (int i = 0; i < category.length; i++)
                           Container(
                             margin: EdgeInsets.symmetric(horizontal: 10),
                             padding: EdgeInsets.all(10),
@@ -169,7 +223,7 @@ class HomePage extends StatelessWidget {
                               ],
                             ),
                             child: Text(
-                              catagory[i],
+                              category[i],
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w500,
@@ -299,13 +353,12 @@ class HomePage extends StatelessWidget {
                     );
                   },
                 ),
-                SizedBox(height: 30),
-                HomeBottomBar(),
               ],
             ),
           ),
         ),
       ),
+      bottomNavigationBar: HomeBottomBar(),
     );
   }
 }
