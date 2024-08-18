@@ -3,67 +3,44 @@ import 'package:flutter/material.dart';
 class HomeAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return AppBar(
+      flexibleSpace: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: <Color>[
+              Color.fromARGB(255, 242, 219, 248), // Light purple
+              Color.fromARGB(245, 232, 209, 238), // Light pink
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+      ),
+      title: Row(
         children: [
-          InkWell(
-            onTap: () {},
-            child: Container(
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 6,
-                  ),
-                ],
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: const Icon(
-                Icons.sort_rounded,
-                size: 28,
-              ),
+          Icon(
+            Icons.location_on,
+            color: Colors.white,
+          ),
+          SizedBox(width: 8), // Add spacing between icon and text
+          Text(
+            "Islamabad, Pakistan", // Replace with your location
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: Colors.white,
             ),
           ),
-          Row(
-            children: [
-              Icon(
-                Icons.location_on,
-                color: Color(0xFFF65959),
-              ),
-              Text(
-                "Islamabad, Pakistan",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-          InkWell(
-              onTap: () {},
-              child: Container(
-                padding: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 6,
-                    ),
-                  ],
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Icon(
-                  Icons.search,
-                  size: 28,
-                ),
-              ))
         ],
       ),
+      actions: [
+        IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () {
+            Scaffold.of(context).openDrawer(); // Open drawer on menu icon tap
+          },
+        ),
+      ],
     );
   }
 }
