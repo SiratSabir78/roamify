@@ -34,6 +34,7 @@ class Booking {
     );
   }
 }
+
 class HomePage extends StatelessWidget {
   final List<String> category = [
     'Best Places',
@@ -43,8 +44,6 @@ class HomePage extends StatelessWidget {
     'Hotels',
     'Restaurants'
   ];
-
-
 
   final List<String> cities = [
     'Paris, France',
@@ -119,7 +118,6 @@ class HomePage extends StatelessWidget {
               trailing: Icon(Icons.reviews),
               title: Text('Reviews'),
               onTap: () {
-                
                 // Handle reviews tap
               },
             ),
