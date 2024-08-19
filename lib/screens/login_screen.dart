@@ -32,7 +32,6 @@ class _LoginState extends State<LoginPage> {
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
-
       // If the user is successfully signed in, navigate to the Wrapper screen
       if (_auth.currentUser != null) {
         Get.offAll(() => const Wrapper());
