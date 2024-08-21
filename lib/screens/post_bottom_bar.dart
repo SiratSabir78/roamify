@@ -63,7 +63,7 @@ class PostBottomBar extends StatelessWidget {
                         borderRadius: BorderRadius.circular(15),
                         child: Image.asset(
                           "images/city5.jpeg",
-                          "images/city5.jpeg",
+                          
                           fit: BoxFit.cover,
                           width: 120,
                           height: 90,
@@ -76,7 +76,7 @@ class PostBottomBar extends StatelessWidget {
                         borderRadius: BorderRadius.circular(15),
                         child: Image.asset(
                           "images/city4.jpeg",
-                          "images/city4.jpeg",
+                          
                           fit: BoxFit.cover,
                           width: 120,
                           height: 90,
