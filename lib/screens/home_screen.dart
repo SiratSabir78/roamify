@@ -8,8 +8,7 @@ import 'package:roamify/screens/favorites_screen.dart';
 import 'package:roamify/screens/profile_screen.dart';
 import 'package:roamify/screens/search_screen.dart';
 import 'package:roamify/screens/post_screen.dart';
-import 'package:roamify/screens/app_setting_screen.dart'; // Import the new screens
-import 'package:roamify/screens/signout.dart';
+import 'package:roamify/screens/app_setting_screen.dart';
 import 'package:roamify/screens/travel_info_screen.dart';
 import 'package:roamify/screens/user_review_Screen.dart';
 
@@ -23,7 +22,7 @@ class _HomePageState extends State<HomePage> {
 
   final List<Widget> _screens = [
     ProfileScreen(),
-    FavoritesPage(),
+    FavoriteScreen(),
     HomeContent(), // Home screen content widget
     BookingPage(), // Updated BookingPage without cityId
     SearchScreen(),
@@ -95,6 +94,12 @@ class _HomePageState extends State<HomePage> {
                     builder: (context) => ReviewsScreen(),
                   ),
                 );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ReviewsScreen(),
+                  ),
+                );
               },
             ),
             ListTile(
@@ -104,7 +109,6 @@ class _HomePageState extends State<HomePage> {
                 await signOutAndNavigate(context);
               },
             ),
-            // Other Drawer items...
           ],
         ),
       ),
@@ -166,9 +170,11 @@ class HomeContent extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) => PostScreen(
+                                cityId: city.id, // Pass cityId here
                                 cityName: city['name'],
                                 imagePath: city['imagePath'],
                                 description: city['description'],
+                                
                               ),
                             ),
                           );
@@ -186,15 +192,22 @@ class HomeContent extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               ClipRRect(
-                                borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(20)),
-                                child: Image.network(
-                                  city['imagePath'],
-                                  height: 200,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
+                                  borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(20)),
+                                  child: Image.network(
+                                    city['imagePath'],
+                                    height: 200,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        height: 200,
+                                        width: double.infinity,
+                                        color: Colors.grey,
+                                        child: Icon(Icons.error),
+                                      );
+                                    },
+                                  )),
                               Container(
                                 padding: EdgeInsets.all(15),
                                 decoration: BoxDecoration(

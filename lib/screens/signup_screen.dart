@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:roamify/screens/login_screen.dart';
-import 'package:roamify/screens/validation_for_signup.dart'; // Import LoginPage
+import 'package:roamify/screens/validation_for_signup.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -16,12 +16,23 @@ class _SignUpState extends State<SignUp> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
-  final TextEditingController phoneController =
-      TextEditingController(); // Phone number controller
+  final TextEditingController phoneController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+
+  String? usernameError; // Store the error message for the username field
 
   Future<void> signup() async {
     if (_formKey.currentState!.validate()) {
+      // Validate username asynchronously
+      String? usernameError =
+          await validateUsername(usernameController.text.trim());
+      if (usernameError != null) {
+        setState(() {
+          this.usernameError = usernameError;
+        });
+        return;
+      }
+
       try {
         // Create user with email and password
         UserCredential userCredential =
@@ -38,12 +49,22 @@ class _SignUpState extends State<SignUp> {
           'username': usernameController.text.trim(),
           'email': emailController.text.trim(),
           'profilePicture': '', // Initially empty
-          'reviews': [], // Initially empty list
           'favoriteCities': [], // Initially empty list
           'bookmarkedCities': [], // Initially empty list
           'phoneNumber': phoneController.text.trim(), // Store phone number
           'travelHistory': [], // Initially empty list
           'userId': userCredential.user!.uid,
+        });
+
+        // Create an empty sub-collection for reviews with a placeholder document
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .collection('reviews')
+            .add({
+          'ReviewId': '',
+          'userId': '',
+          'reviews': '',
         });
 
         // Navigate to LoginPage
@@ -53,12 +74,14 @@ class _SignUpState extends State<SignUp> {
           'Sign Up Error',
           e.toString(),
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Color.fromARGB(255, 221, 128, 244),
+          backgroundColor: const Color.fromARGB(255, 221, 128, 244),
           colorText: Colors.white,
         );
       }
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -97,14 +120,20 @@ class _SignUpState extends State<SignUp> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(20.0),
                           ),
+                          errorText:
+                              usernameError, // Show error text if username is taken
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your username';
-                          }
-                          return null;
+                          return usernameError; // Apply async validation here
+                        },
+                        onChanged: (value) async {
+                          final error = await validateUsername(value);
+                          setState(() {
+                            usernameError = error;
+                          });
                         },
                       ),
+
                       const SizedBox(height: 15),
                       TextFormField(
                         controller: emailController,
@@ -116,11 +145,7 @@ class _SignUpState extends State<SignUp> {
                             borderRadius: BorderRadius.circular(20.0),
                           ),
                         ),
-                        validator: (value) {
-                          String? error = validateEmail(value);
-                          
-                          return error;
-                        },
+                        validator: (value) => validateEmail(value),
                       ),
                       const SizedBox(height: 15),
                       TextFormField(
@@ -133,11 +158,7 @@ class _SignUpState extends State<SignUp> {
                             borderRadius: BorderRadius.circular(20.0),
                           ),
                         ),
-                        validator: (value) {
-                          String? error = validatePhoneNumber(value);
-                          
-                          return error;
-                        },
+                        validator: (value) => validatePhoneNumber(value),
                       ),
                       const SizedBox(height: 15),
                       TextFormField(
@@ -150,11 +171,7 @@ class _SignUpState extends State<SignUp> {
                             borderRadius: BorderRadius.circular(20.0),
                           ),
                         ),
-                        validator: (value) {
-                          String? error = validatePassword(value);
-                          
-                          return error;
-                        },
+                        validator: (value) => validatePassword(value),
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
