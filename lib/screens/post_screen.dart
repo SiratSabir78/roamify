@@ -74,10 +74,7 @@ class PostScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20), // Add spacing
               Expanded(
-                child: PostBottomBar(
-                    //cityName: cityName,
-                    //description: description,
-                    ),
+                child: PostBottomBar(),
               ),
             ],
           ),
