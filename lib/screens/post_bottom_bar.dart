@@ -62,7 +62,7 @@ class PostBottomBar extends StatelessWidget {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(15),
                         child: Image.asset(
-                          "images/city5.jpg",
+                          "images/city5.jpeg",
                           fit: BoxFit.cover,
                           width: 120,
                           height: 90,
@@ -74,7 +74,7 @@ class PostBottomBar extends StatelessWidget {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(15),
                         child: Image.asset(
-                          "images/city4.jpg",
+                          "images/city4.jpeg",
                           fit: BoxFit.cover,
                           width: 120,
                           height: 90,
@@ -91,7 +91,7 @@ class PostBottomBar extends StatelessWidget {
                           color: Colors.black,
                           borderRadius: BorderRadius.circular(15),
                           image: DecorationImage(
-                            image: AssetImage("image/city6.jpg"),
+                            image: AssetImage("images/city6.jpeg"),
                             fit: BoxFit.cover,
                             opacity: 0.4,
                           ),

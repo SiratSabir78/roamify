@@ -22,7 +22,7 @@ class _HomePageState extends State<HomePage> {
 
   final List<Widget> _screens = [
     ProfileScreen(),
-    FavoritesPage(),
+    FavoriteScreen(),
     HomeContent(), // Home screen content widget
     BookingPage(), // Updated BookingPage without cityId
     SearchScreen(),
@@ -96,7 +96,6 @@ class _HomePageState extends State<HomePage> {
                 );
               },
             ),
-            // Other Drawer items...
           ],
         ),
       ),
@@ -162,6 +161,7 @@ class HomeContent extends StatelessWidget {
                                 cityName: city['name'],
                                 imagePath: city['imagePath'],
                                 description: city['description'],
+                                
                               ),
                             ),
                           );
@@ -179,15 +179,22 @@ class HomeContent extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               ClipRRect(
-                                borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(20)),
-                                child: Image.network(
-                                  city['imagePath'],
-                                  height: 200,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
+                                  borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(20)),
+                                  child: Image.network(
+                                    city['imagePath'],
+                                    height: 200,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        height: 200,
+                                        width: double.infinity,
+                                        color: Colors.grey,
+                                        child: Icon(Icons.error),
+                                      );
+                                    },
+                                  )),
                               Container(
                                 padding: EdgeInsets.all(15),
                                 decoration: BoxDecoration(
@@ -286,4 +293,3 @@ class HomeContent extends StatelessWidget {
     );
   }
 }
-
