@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class ReviewsScreen extends StatelessWidget {
+class TravelInfoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Reviews'),
+        title: Text('Travel Info'),
         backgroundColor: const Color.fromARGB(255, 221, 128, 244),
       ),
       body: Padding(
@@ -14,15 +14,15 @@ class ReviewsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'User Reviews',
+              'Travel Information',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
             Text(
-              'Read what other users have to say about their experiences with Roamify.',
+              'Here you can find general travel information including tips, guidelines, and more.',
               style: TextStyle(fontSize: 16),
             ),
-            // Add review list or feedback options as needed
+            // Add more information as needed
           ],
         ),
       ),

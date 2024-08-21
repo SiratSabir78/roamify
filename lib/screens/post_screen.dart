@@ -25,7 +25,8 @@ class PostScreen extends StatelessWidget {
         children: [
           Column(
             children: [
-              Image.asset(
+              Image.network(
+                // Use network image instead of asset
                 imagePath,
                 height: MediaQuery.of(context).size.height / 2,
                 width: double.infinity,
