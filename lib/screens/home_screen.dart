@@ -2,13 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart'; // For date formatting
 import 'package:roamify/screens/booking_page.dart';
 import 'package:roamify/screens/favorites_provider.dart';
 import 'package:roamify/screens/favorites_screen.dart';
 import 'package:roamify/screens/profile_screen.dart';
 import 'package:roamify/screens/search_screen.dart';
 import 'package:roamify/screens/post_screen.dart';
+import 'package:roamify/screens/app_setting_screen.dart'; // Import the new screens
+import 'package:roamify/screens/travel_info_screen.dart';
+import 'package:roamify/screens/user_review_Screen.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -57,6 +59,42 @@ class _HomePageState extends State<HomePage> {
               title: Text('Home'),
               onTap: () {
                 Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.app_settings_alt),
+              title: Text('App Settings'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AppSettingsScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.info),
+              title: Text('Travel Info'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TravelInfoScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.feedback),
+              title: Text('Reviews'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ReviewsScreen(),
+                  ),
+                );
               },
             ),
             // Other Drawer items...

@@ -17,10 +17,14 @@ class _LoginState extends State<LoginPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   bool _isLoading = false;
+  String? _emailError;
+  String? _passwordError;
 
   Future<void> signIn() async {
     setState(() {
       _isLoading = true;
+      _emailError = null;
+      _passwordError = null;
     });
 
     try {
@@ -28,53 +32,30 @@ class _LoginState extends State<LoginPage> {
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
-
       // If the user is successfully signed in, navigate to the Wrapper screen
       if (_auth.currentUser != null) {
         Get.offAll(() => Wrapper());
       }
     } on FirebaseAuthException catch (e) {
       // Handle specific Firebase authentication exceptions
-      String errorMessage;
-
-      // Add a debug print statement to check the error code
-      print("FirebaseAuthException code: ${e.code}");
-
-      switch (e.code) {
-        case 'invalid-credential':
-          errorMessage =
-              'No user found with this email. Please check your email address.';
-          break;
-        case 'wrong-password':
-          errorMessage = 'Incorrect password. Please try again.';
-          break;
-        case 'invalid-email':
-          errorMessage =
-              'The email address is not valid. Please enter a valid email.';
-          break;
-        default:
-          errorMessage =
-              'An unknown error occurred. Please try again.'; // Updated default message
-          break;
-      }
-
-      // Display the specific error message
-      Get.snackbar(
-        'Login Error',
-        errorMessage,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      setState(() {
+        switch (e.code) {
+          case 'invalid-credential':
+          case 'invalid-email':
+            _emailError = 'Please enter a valid email address.';
+            break;
+          case 'wrong-password':
+            _passwordError = 'Incorrect password. Please try again.';
+            break;
+          default:
+            _emailError = 'An unknown error occurred. Please try again.';
+        }
+      });
     } catch (e) {
       // Handle any other exceptions
-      Get.snackbar(
-        'Login Error',
-        'An unexpected error occurred: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      setState(() {
+        _emailError = 'An unexpected error occurred: ${e.toString()}';
+      });
     } finally {
       setState(() {
         _isLoading = false;
@@ -115,9 +96,10 @@ class _LoginState extends State<LoginPage> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                 ),
+                errorText: _emailError,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 5),
             TextField(
               controller: passwordController,
               obscureText: true,
@@ -127,6 +109,7 @@ class _LoginState extends State<LoginPage> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                 ),
+                errorText: _passwordError,
               ),
             ),
             const SizedBox(height: 40),
