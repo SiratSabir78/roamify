@@ -28,10 +28,7 @@ class PostScreen extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
               Expanded(
-                child: PostBottomBar(
-                  //cityName: cityName,
-                 // description: description,
-                ),
+                child: PostBottomBar(),
               ),
             ],
           ),
