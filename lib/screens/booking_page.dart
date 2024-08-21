@@ -1,17 +1,34 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Import intl package for DateFormat
 
 class BookingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // Get the current user ID
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text("My Bookings"),
+          backgroundColor: const Color.fromARGB(255, 221, 128, 244),
+        ),
+        body: Center(child: Text("No user signed in")),
+      );
+    }
+    String userId = user.uid;
+
     return Scaffold(
       appBar: AppBar(
         title: Text("My Bookings"),
         backgroundColor: const Color.fromARGB(255, 221, 128, 244),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('bookings').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('bookings')
+            .where('userId', isEqualTo: userId) // Filter by userId
+            .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -30,7 +47,7 @@ class BookingPage extends StatelessWidget {
                   booking['bookingId'] ?? 'Unknown'; // Handle missing field
               var cityId =
                   booking['cityId'] ?? 'Unknown'; // Handle missing field
-              var date = booking['date']?.toDate() ??
+              var date = booking['timestamp']?.toDate() ??
                   DateTime
                       .now(); // Handle missing field and convert to DateTime
 
@@ -66,8 +83,8 @@ class BookingPage extends StatelessWidget {
                             bool confirmDelete =
                                 await _showConfirmationDialog(context);
                             if (confirmDelete) {
-                              // Delete the booking from both the main collection and the sub-collection
-                              await _deleteBooking(bookingId, cityId);
+                              // Delete the booking from all relevant locations
+                              await _deleteBooking(bookingId, cityId, userId);
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -111,7 +128,8 @@ class BookingPage extends StatelessWidget {
         false;
   }
 
-  Future<void> _deleteBooking(String bookingId, String cityId) async {
+  Future<void> _deleteBooking(
+      String bookingId, String cityId, String userId) async {
     final firestore = FirebaseFirestore.instance;
 
     try {
@@ -140,6 +158,21 @@ class BookingPage extends StatelessWidget {
 
         if (subCollectionBookingSnapshot.docs.isNotEmpty) {
           for (var doc in subCollectionBookingSnapshot.docs) {
+            transaction.delete(doc.reference);
+          }
+        }
+
+        // Delete from the user's 'bookings' sub-collection
+        QuerySnapshot userBookingSnapshot = await firestore
+            .collection('users')
+            .doc(userId)
+            .collection('bookings')
+            .where('bookingId', isEqualTo: bookingId)
+            .limit(1)
+            .get();
+
+        if (userBookingSnapshot.docs.isNotEmpty) {
+          for (var doc in userBookingSnapshot.docs) {
             transaction.delete(doc.reference);
           }
         }
@@ -298,6 +331,13 @@ class _BookingFormDialogState extends State<BookingFormDialog> {
               });
 
               try {
+                // Get current user ID
+                User? user = FirebaseAuth.instance.currentUser;
+                if (user == null) {
+                  throw Exception('No user signed in');
+                }
+                String userId = user.uid;
+
                 // Generate a unique ID for the booking
                 DocumentReference bookingRef = FirebaseFirestore.instance
                     .collection('bookings')
@@ -307,7 +347,7 @@ class _BookingFormDialogState extends State<BookingFormDialog> {
                 await bookingRef.set({
                   'bookingId': bookingRef.id, // Include unique booking ID
                   'cityId': widget.cityId,
-                  'userId': 'userId', // Replace with actual user ID
+                  'userId': userId,
                   'checkInDate': _checkInDate,
                   'checkOutDate': _checkOutDate,
                   'timestamp': FieldValue.serverTimestamp(),
@@ -322,7 +362,22 @@ class _BookingFormDialogState extends State<BookingFormDialog> {
                         bookingRef.id) // Use the same unique ID for consistency
                     .set({
                   'bookingId': bookingRef.id, // Include unique booking ID
-                  'userId': 'userId', // Replace with actual user ID
+                  'userId': userId, // Replace with actual user ID
+                  'checkInDate': _checkInDate,
+                  'checkOutDate': _checkOutDate,
+                  'timestamp': FieldValue.serverTimestamp(),
+                });
+
+                // Save to the user's bookings subcollection
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(userId)
+                    .collection('bookings')
+                    .doc(
+                        bookingRef.id) // Use the same unique ID for consistency
+                    .set({
+                  'bookingId': bookingRef.id, // Include unique booking ID
+                  'cityId': widget.cityId,
                   'checkInDate': _checkInDate,
                   'checkOutDate': _checkOutDate,
                   'timestamp': FieldValue.serverTimestamp(),

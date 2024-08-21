@@ -21,10 +21,10 @@ String? validatePhoneNumber(String? value) {
     return 'Please enter your phone number';
   } else if (!RegExp(r'^\d+$').hasMatch(value)) {
     return 'Phone number must be numeric';
-  } else if (value.length > 12) {
-    return 'Phone number must not exceed 12 digits';
-  } else if (value.length < 12) {
-    return 'Phone number must have at least 12 digits';
+  } else if (value.length >= 12) {
+    return 'Phone number must not exceed 11 digits';
+  } else if (value.length < 11) {
+    return 'Phone number must have at least 11 digits';
   }
   return null;
 }
