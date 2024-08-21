@@ -16,10 +16,8 @@ class _HomeBottomBarState extends State<HomeBottomBar> {
 
   final List<Widget> _screens = [
     ProfileScreen(),
-    FavoritesPage(),
-   // HomePage(), // Home screen
-    BookingPage(
-    ),
+    FavoriteScreen(),
+    BookingPage(),
     SearchScreen(),
   ];
 
