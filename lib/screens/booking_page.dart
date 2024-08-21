@@ -71,9 +71,12 @@ class BookingPage extends StatelessWidget {
                             }
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
+                            backgroundColor: Color.fromARGB(255, 231, 138, 138),
                           ),
-                          child: Text('Remove'),
+                          child: Text(
+                            'Remove',
+                            style: TextStyle(color: Colors.black),
+                          ),
                         ),
                       ],
                     ),
@@ -192,6 +195,7 @@ void _showDetailsDialog(BuildContext context, String cityName, DateTime date) {
     },
   );
 }
+
 class BookingFormDialog extends StatefulWidget {
   final String cityId;
 
