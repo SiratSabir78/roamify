@@ -10,11 +10,12 @@ class Booking {
   String city;
   DateTime date;
 
-  Booking(
-      {required this.id,
-      required this.userId,
-      required this.city,
-      required this.date});
+  Booking({
+    required this.id,
+    required this.userId,
+    required this.city,
+    required this.date,
+  });
 
   Map<String, dynamic> toMap() {
     return {
@@ -62,6 +63,15 @@ class HomePage extends StatelessWidget {
     'Amsterdam is famous for its picturesque canals...',
     'Baku, the capital of Azerbaijan, offers a rich tapestry of tourism spots...'
   ];
+
+  final List<String> cityIds = [
+    'paris_france',
+    'swiss_alps_switzerland',
+    'stockholm_sweden',
+    'berlin_germany',
+    'amsterdam_netherlands',
+    'baku_azerbaijan'
+  ]; // Add unique IDs for each city
 
   HomePage({super.key});
 
@@ -146,8 +156,9 @@ class HomePage extends StatelessWidget {
                                   MaterialPageRoute(
                                     builder: (context) => PostScreen(
                                       cityName: cities[index],
-                                      imagePath: "images/city${index + 1}.jpeg",
                                       description: descriptions[index],
+                                      imagePath: "images/city${index + 1}.jpeg",
+                                      cityId: cityIds[index], // Pass the cityId
                                     ),
                                   ),
                                 );
@@ -248,6 +259,7 @@ class HomePage extends StatelessWidget {
                               cityName: cities[index],
                               imagePath: "images/city${index + 1}.jpeg",
                               description: descriptions[index],
+                              cityId: cityIds[index], // Pass the cityId
                             ),
                           ),
                         );
