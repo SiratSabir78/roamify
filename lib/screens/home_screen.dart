@@ -9,6 +9,7 @@ import 'package:roamify/screens/profile_screen.dart';
 import 'package:roamify/screens/search_screen.dart';
 import 'package:roamify/screens/post_screen.dart';
 import 'package:roamify/screens/app_setting_screen.dart';
+import 'package:roamify/screens/signout.dart';
 import 'package:roamify/screens/travel_info_screen.dart';
 import 'package:roamify/screens/user_review_Screen.dart';
 
