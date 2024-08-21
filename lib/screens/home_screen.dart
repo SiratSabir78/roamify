@@ -15,6 +15,7 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
+<<<<<<< HEAD
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 2; // Default index for home screen
 
@@ -26,6 +27,38 @@ class _HomePageState extends State<HomePage> {
     SearchScreen(),
   ];
 
+=======
+class HomePage extends StatelessWidget {
+  final List<String> category = [
+    'Best Places',
+    'Most Visited',
+    'Favourites',
+    'New Added',
+    'Hotels',
+    'Restaurants'
+  ];
+
+  final List<String> cities = [
+    'Paris, France',
+    'Swiss Alps, Switzerland',
+    'Stockholm, Sweden',
+    'Berlin, Germany',
+    'Amsterdam, Netherlands',
+    'Baku, Azerbaijan'
+  ];
+
+  final List<String> descriptions = [
+    'Paris is a global center for art, fashion, gastronomy, and culture...',
+    'Switzerland is renowned for its stunning landscapes...',
+    'Stockholm, the capital of Sweden, boasts an array of enchanting tourism spots...',
+    'Berlin is rich in historical and cultural tourism spots...',
+    'Amsterdam is famous for its picturesque canals...',
+    'Baku, the capital of Azerbaijan, offers a rich tapestry of tourism spots...'
+  ];
+
+  HomePage({super.key});
+
+>>>>>>> 4881b5560d8e92919762765e0da49f58dcdba87d
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,7 +88,32 @@ class _HomePageState extends State<HomePage> {
               leading: Icon(Icons.home),
               title: Text('Home'),
               onTap: () {
+<<<<<<< HEAD
                 Navigator.pop(context);
+=======
+                // Handle person settings tap
+              },
+            ),
+            ListTile(
+              trailing: Icon(Icons.app_settings_alt),
+              title: Text('App Settings'),
+              onTap: () {
+                // Handle app settings tap
+              },
+            ),
+            ListTile(
+              trailing: Icon(Icons.info),
+              title: Text('Travel Info'),
+              onTap: () {
+                // Handle travel info tap
+              },
+            ),
+            ListTile(
+              trailing: Icon(Icons.reviews),
+              title: Text('Reviews'),
+              onTap: () {
+                // Handle reviews tap
+>>>>>>> 4881b5560d8e92919762765e0da49f58dcdba87d
               },
             ),
             // Other Drawer items...
