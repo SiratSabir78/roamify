@@ -1,71 +1,32 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:roamify/Widgets/home_app_bar.dart';
-import 'package:roamify/Widgets/home_botton_bar.dart';
-import 'booking_page.dart';
-import 'post_screen.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:provider/provider.dart';
+import 'package:roamify/screens/booking_page.dart';
+import 'package:roamify/screens/favorites_provider.dart';
+import 'package:roamify/screens/favorites_screen.dart';
+import 'package:roamify/screens/profile_screen.dart';
+import 'package:roamify/screens/search_screen.dart';
+import 'package:roamify/screens/post_screen.dart';
+import 'package:roamify/screens/app_setting_screen.dart'; // Import the new screens
+import 'package:roamify/screens/travel_info_screen.dart';
+import 'package:roamify/screens/user_review_Screen.dart';
 
-class Booking {
-  String id;
-  String userId;
-  String city;
-  DateTime date;
-
-  Booking(
-      {required this.id,
-      required this.userId,
-      required this.city,
-      required this.date});
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'userId': userId,
-      'city': city,
-      'date': date.toIso8601String(),
-    };
-  }
-
-  factory Booking.fromMap(Map<String, dynamic> map) {
-    return Booking(
-      id: map['id'],
-      userId: map['userId'],
-      city: map['city'],
-      date: DateTime.parse(map['date']),
-    );
-  }
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
 }
-class HomePage extends StatelessWidget {
-  final List<String> category = [
-    'Best Places',
-    'Most Visited',
-    'Favourites',
-    'New Added',
-    'Hotels',
-    'Restaurants'
+
+class _HomePageState extends State<HomePage> {
+  int _currentIndex = 2; // Default index for home screen
+
+  final List<Widget> _screens = [
+    ProfileScreen(),
+    FavoritesPage(),
+    HomeContent(), // Home screen content widget
+    BookingPage(), // Updated BookingPage without cityId
+    SearchScreen(),
   ];
-
-
-
-  final List<String> cities = [
-    'Paris, France',
-    'Swiss Alps, Switzerland',
-    'Stockholm, Sweden',
-    'Berlin, Germany',
-    'Amsterdam, Netherlands',
-    'Baku, Azerbaijan'
-  ];
-
-  final List<String> descriptions = [
-    'Paris is a global center for art, fashion, gastronomy, and culture...',
-    'Switzerland is renowned for its stunning landscapes...',
-    'Stockholm, the capital of Sweden, boasts an array of enchanting tourism spots...',
-    'Berlin is rich in historical and cultural tourism spots...',
-    'Amsterdam is famous for its picturesque canals...',
-    'Baku, the capital of Azerbaijan, offers a rich tapestry of tourism spots...'
-  ];
-
-  HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -127,8 +88,12 @@ class HomePage extends StatelessWidget {
               leading: Icon(Icons.feedback),
               title: Text('Reviews'),
               onTap: () {
-                
-                // Handle reviews tap
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ReviewsScreen(),
+                  ),
+                );
               },
             ),
             // Other Drawer items...
