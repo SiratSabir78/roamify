@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
       appBar: _currentIndex == 2
           ? AppBar(
               title: Text("Roamify"),
-              backgroundColor: const Color.fromARGB(255, 221, 128, 244),
+              backgroundColor: const Color.fromARGB(255, 242, 219, 248),
             )
           : null,
       drawer: Drawer(
@@ -57,6 +57,7 @@ class _HomePageState extends State<HomePage> {
             ListTile(
               leading: Icon(Icons.home),
               title: Text('Home'),
+              iconColor: Colors.black,
               onTap: () {
                 Navigator.pop(context);
               },
@@ -64,6 +65,7 @@ class _HomePageState extends State<HomePage> {
             ListTile(
               leading: Icon(Icons.app_settings_alt),
               title: Text('App Settings'),
+              iconColor: Colors.black,
               onTap: () {
                 Navigator.push(
                   context,
@@ -76,6 +78,7 @@ class _HomePageState extends State<HomePage> {
             ListTile(
               leading: Icon(Icons.info),
               title: Text('Travel Info'),
+              iconColor: Colors.black,
               onTap: () {
                 Navigator.push(
                   context,
@@ -88,6 +91,7 @@ class _HomePageState extends State<HomePage> {
             ListTile(
               leading: Icon(Icons.feedback),
               title: Text('Reviews'),
+              iconColor: Colors.black,
               onTap: () {
                 Navigator.push(
                   context,
@@ -112,11 +116,22 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.transparent,
         index: _currentIndex,
         items: const [
-          Icon(Icons.person_outline, size: 30),
-          Icon(Icons.favorite_outline_outlined, size: 30),
-          Icon(Icons.home, size: 30, color: Colors.redAccent),
-          Icon(Icons.menu_book, size: 30),
-          Icon(Icons.list, size: 30),
+          Icon(
+            Icons.person_outline,
+            size: 30,
+            color: Color.fromARGB(255, 227, 139, 249),
+          ),
+          Icon(
+            Icons.favorite_outline_outlined,
+            size: 30,
+            color: const Color.fromARGB(255, 227, 139, 249),
+          ),
+          Icon(Icons.home,
+              size: 30, color: Color.fromARGB(255, 227, 139, 249)),
+          Icon(Icons.menu_book,
+              size: 30, color: const Color.fromARGB(255, 227, 139, 249)),
+          Icon(Icons.list,
+              size: 30, color: const Color.fromARGB(255, 227, 139, 249)),
         ],
         onTap: (index) {
           setState(() {
