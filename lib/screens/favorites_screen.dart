@@ -21,6 +21,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Favorite Cities'),
+        backgroundColor: Color.fromARGB(248, 252, 177, 251),
       ),
       body: FutureBuilder<List<String>>(
         future: _favoriteCitiesFuture,
