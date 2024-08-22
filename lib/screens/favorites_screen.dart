@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:roamify/screens/home_screen.dart';
 
 class FavoriteScreen extends StatefulWidget {
   @override
@@ -45,7 +46,6 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                 title: Text(cityName),
                 leading: Icon(Icons.star, color: Colors.amber),
                 trailing: ElevatedButton(
-                
                   onPressed: () async {
                     await _removeFromFavorites(context, cityName);
                     setState(() {
@@ -56,8 +56,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                   child: Text('Remove'),
                 ),
                 onTap: () {
-                  // You can add functionality here if needed
-                  // For example, navigate to a details page
+                  HomePage();
                 },
               );
             },
