@@ -50,6 +50,7 @@ class PostScreen extends StatelessWidget {
                       builder: (context) => ReviewPage(
                         cityId: cityId,
                         cityName: cityName,
+
                         //cityImageUrl: imagePath,
                       ),
                     ),

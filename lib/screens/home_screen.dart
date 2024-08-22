@@ -92,13 +92,7 @@ class _HomePageState extends State<HomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ReviewsScreen(),
-                  ),
-                );
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ReviewsScreen(),
+                    builder: (context) => ReviewScreen(),
                   ),
                 );
               },
@@ -175,7 +169,6 @@ class HomeContent extends StatelessWidget {
                                 cityName: city['name'],
                                 imagePath: city['imagePath'],
                                 description: city['description'],
-                                
                               ),
                             ),
                           );

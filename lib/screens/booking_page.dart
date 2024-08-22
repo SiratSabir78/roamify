@@ -47,7 +47,10 @@ class BookingPage extends StatelessWidget {
                   booking['bookingId'] ?? 'Unknown'; // Handle missing field
               var cityId =
                   booking['cityId'] ?? 'Unknown'; // Handle missing field
-              var date = booking['timestamp']?.toDate() ??
+              var checkInDate = booking['checkInDate']?.toDate() ??
+                  DateTime
+                      .now(); // Handle missing field and convert to DateTime
+              var checkOutDate = booking['checkOutDate']?.toDate() ??
                   DateTime
                       .now(); // Handle missing field and convert to DateTime
 
@@ -61,41 +64,48 @@ class BookingPage extends StatelessWidget {
                     }
                   }
 
-                  return ListTile(
-                    title: Text(
-                      '$cityName',
-                      style: TextStyle(fontSize: 20.0),
-                    ),
-                    subtitle: Text(
-                        "Booking Date: ${DateFormat('yyyy-MM-dd').format(date)}"),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            _showDetailsDialog(context, cityName, date);
-                          },
-                          child: Text('Details'),
-                        ),
-                        SizedBox(width: 8),
-                        ElevatedButton(
-                          onPressed: () async {
-                            bool confirmDelete =
-                                await _showConfirmationDialog(context);
-                            if (confirmDelete) {
-                              // Delete the booking from all relevant locations
-                              await _deleteBooking(bookingId, cityId, userId);
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color.fromARGB(255, 231, 138, 138),
+                  return Card(
+                    margin: EdgeInsets.all(8.0),
+                    child: ListTile(
+                      contentPadding: EdgeInsets.all(16.0),
+                      title: Text(
+                        '$cityName',
+                        style: TextStyle(fontSize: 20.0),
+                      ),
+                      subtitle: Text(
+                          "Check-In: ${DateFormat('yyyy-MM-dd').format(checkInDate)}\nCheck-Out: ${DateFormat('yyyy-MM-dd').format(checkOutDate)}"),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              _showDetailsDialog(
+                                context,
+                                cityName,
+                                checkInDate,
+                                checkOutDate,
+                              );
+                            },
+                            child: Text('Details'),
                           ),
-                          child: Text(
-                            'Remove',
-                            style: TextStyle(color: Colors.black),
+                          SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () async {
+                              bool confirmDelete =
+                                  await _showConfirmationDialog(context);
+                              if (confirmDelete) {
+                                // Delete the booking from all relevant locations
+                                await _deleteBooking(bookingId, cityId, userId);
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(),
+                            child: Text(
+                              'Remove',
+                              style: TextStyle(color: Colors.black),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -185,48 +195,53 @@ class BookingPage extends StatelessWidget {
   Future<DocumentSnapshot> _fetchCityName(String cityId) async {
     return FirebaseFirestore.instance.collection('cities').doc(cityId).get();
   }
-}
 
-void _showDetailsDialog(BuildContext context, String cityName, DateTime date) {
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: Text('Booking Details'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'City Name: $cityName',
-              style: Theme.of(context).textTheme.headline6,
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Booking Date: ${DateFormat('yyyy-MM-dd').format(date)}',
-              style: Theme.of(context).textTheme.subtitle1,
-            ),
-            // Add more details as needed
-            // For example:
-            SizedBox(height: 8),
-            Text(
-              'Additional Information:',
-              style: Theme.of(context).textTheme.subtitle1,
-            ),
-            // Include additional details here
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text('Close'),
+  void _showDetailsDialog(
+    BuildContext context,
+    String cityName,
+    DateTime checkInDate,
+    DateTime checkOutDate,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Booking Details'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'City Name: $cityName',
+                style: Theme.of(context).textTheme.headline6,
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Check-In Date: ${DateFormat('yyyy-MM-dd').format(checkInDate)}',
+                style: Theme.of(context).textTheme.subtitle1,
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Check-Out Date: ${DateFormat('yyyy-MM-dd').format(checkOutDate)}',
+                style: Theme.of(context).textTheme.subtitle1,
+              ),
+              SizedBox(height: 8),
+
+              // Include additional details here
+            ],
           ),
-        ],
-      );
-    },
-  );
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 class BookingFormDialog extends StatefulWidget {
@@ -255,25 +270,33 @@ class _BookingFormDialogState extends State<BookingFormDialog> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextFormField(
-                decoration: InputDecoration(labelText: 'Check-in Date'),
+                decoration: InputDecoration(
+                  labelText: 'Check-in Date',
+                  suffixIcon: Icon(Icons.calendar_today),
+                ),
                 readOnly: true,
                 controller: TextEditingController(
                   text: DateFormat('yyyy-MM-dd').format(_checkInDate),
                 ),
                 onTap: () async {
-                  DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: _checkInDate,
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime.now().add(Duration(days: 365)),
-                  );
-                  if (picked != null && picked != _checkInDate) {
-                    setState(() {
-                      _checkInDate = picked;
-                      if (_checkOutDate.isBefore(_checkInDate)) {
-                        _checkOutDate = _checkInDate.add(Duration(days: 1));
-                      }
-                    });
+                  try {
+                    DateTime? picked = await showDatePicker(
+                      context: context,
+                      initialDate: _checkInDate,
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime.now().add(Duration(days: 365)),
+                    );
+                    if (picked != null && picked != _checkInDate) {
+                      setState(() {
+                        _checkInDate = picked;
+                        // Ensure check-out date is not before check-in date
+                        if (_checkOutDate.isBefore(_checkInDate)) {
+                          _checkOutDate = _checkInDate.add(Duration(days: 1));
+                        }
+                      });
+                    }
+                  } catch (e) {
+                    print('Error selecting date: $e');
                   }
                 },
                 validator: (value) {
@@ -285,22 +308,30 @@ class _BookingFormDialogState extends State<BookingFormDialog> {
               ),
               SizedBox(height: 20),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Check-out Date'),
+                decoration: InputDecoration(
+                  labelText: 'Check-out Date',
+                  suffixIcon: Icon(Icons.calendar_today),
+                ),
                 readOnly: true,
                 controller: TextEditingController(
                   text: DateFormat('yyyy-MM-dd').format(_checkOutDate),
                 ),
                 onTap: () async {
-                  DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: _checkOutDate,
-                    firstDate: _checkInDate.add(Duration(days: 1)),
-                    lastDate: DateTime.now().add(Duration(days: 365)),
-                  );
-                  if (picked != null && picked != _checkOutDate) {
-                    setState(() {
-                      _checkOutDate = picked;
-                    });
+                  try {
+                    DateTime? picked = await showDatePicker(
+                      context: context,
+                      initialDate: _checkOutDate,
+                      firstDate: _checkInDate.add(Duration(
+                          days: 1)), // Ensure check-out is after check-in
+                      lastDate: DateTime.now().add(Duration(days: 365)),
+                    );
+                    if (picked != null && picked != _checkOutDate) {
+                      setState(() {
+                        _checkOutDate = picked;
+                      });
+                    }
+                  } catch (e) {
+                    print('Error selecting date: $e');
                   }
                 },
                 validator: (value) {
@@ -331,21 +362,17 @@ class _BookingFormDialogState extends State<BookingFormDialog> {
               });
 
               try {
-                // Get current user ID
                 User? user = FirebaseAuth.instance.currentUser;
                 if (user == null) {
                   throw Exception('No user signed in');
                 }
                 String userId = user.uid;
 
-                // Generate a unique ID for the booking
-                DocumentReference bookingRef = FirebaseFirestore.instance
-                    .collection('bookings')
-                    .doc(); // Generate a new document reference with a unique ID
+                DocumentReference bookingRef =
+                    FirebaseFirestore.instance.collection('bookings').doc();
 
-                // Save to main bookings collection
                 await bookingRef.set({
-                  'bookingId': bookingRef.id, // Include unique booking ID
+                  'bookingId': bookingRef.id,
                   'cityId': widget.cityId,
                   'userId': userId,
                   'checkInDate': _checkInDate,
@@ -353,39 +380,38 @@ class _BookingFormDialogState extends State<BookingFormDialog> {
                   'timestamp': FieldValue.serverTimestamp(),
                 });
 
-                // Save to subcollection of the selected city
                 await FirebaseFirestore.instance
                     .collection('cities')
                     .doc(widget.cityId)
                     .collection('bookings')
-                    .doc(
-                        bookingRef.id) // Use the same unique ID for consistency
+                    .doc(bookingRef.id)
                     .set({
-                  'bookingId': bookingRef.id, // Include unique booking ID
-                  'userId': userId, // Replace with actual user ID
+                  'bookingId': bookingRef.id,
+                  'userId': userId,
                   'checkInDate': _checkInDate,
                   'checkOutDate': _checkOutDate,
                   'timestamp': FieldValue.serverTimestamp(),
                 });
 
-                // Save to the user's bookings subcollection
                 await FirebaseFirestore.instance
                     .collection('users')
                     .doc(userId)
                     .collection('bookings')
-                    .doc(
-                        bookingRef.id) // Use the same unique ID for consistency
+                    .doc(bookingRef.id)
                     .set({
-                  'bookingId': bookingRef.id, // Include unique booking ID
+                  'bookingId': bookingRef.id,
                   'cityId': widget.cityId,
                   'checkInDate': _checkInDate,
                   'checkOutDate': _checkOutDate,
                   'timestamp': FieldValue.serverTimestamp(),
                 });
 
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Booking successful!')),
+                );
+
                 Navigator.of(context).pop();
               } catch (e) {
-                // Handle errors
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Failed to book the trip')),
                 );
