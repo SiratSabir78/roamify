@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/widgets.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -11,23 +10,39 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final User? _user = FirebaseAuth.instance.currentUser;
   String _username = '';
+  String _email = '';
 
   @override
   void initState() {
     super.initState();
-    _loadUsername();
+    _loadUserData();
   }
 
-  void _loadUsername() async {
+  void _loadUserData() async {
     if (_user != null) {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(_user!.uid)
-          .get();
+      try {
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(_user!.uid)
+            .get();
 
-      setState(() {
-        _username = userDoc['username'];
-      });
+        if (userDoc.exists) {
+          setState(() {
+            _username = userDoc['username'] ?? '';
+            _email = userDoc['email'] ?? '';
+            // _lastEmailChangeDate = (userDoc['lastEmailChange'] as Timestamp?)?.toDate();
+          });
+        } else {
+          print('User document does not exist');
+        }
+      } catch (e) {
+        print('Error loading user data: $e');
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error loading user data: $e'),
+        ));
+      }
+    } else {
+      print('User is not authenticated');
     }
   }
 
@@ -63,33 +78,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 TextButton(
                   onPressed: () async {
-                    if (_user != null) {
-                      String newUsername = usernameController.text.trim();
+                    String newUsername = usernameController.text.trim();
 
-                      if (newUsername == _username) {
+                    if (newUsername.isEmpty) {
+                      setState(() {
+                        usernameError = 'Username cannot be empty.';
+                      });
+                    } else if (newUsername == _username) {
+                      setState(() {
+                        usernameError =
+                            'Username is the same as the current one. Please choose a different username.';
+                      });
+                    } else {
+                      try {
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(_user!.uid)
+                            .update({'username': newUsername});
+                        _loadUserData(); // Refresh the username on the profile screen
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text('Username changed successfully!')));
+                      } catch (e) {
                         setState(() {
-                          usernameError =
-                              'Username is the same as the current one. Please choose a different username.';
+                          usernameError = 'Failed to change username: $e';
                         });
-                      } else if (newUsername.isEmpty) {
-                        setState(() {
-                          usernameError = 'Username cannot be empty.';
-                        });
-                      } else {
-                        try {
-                          await FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(_user!.uid)
-                              .update({'username': newUsername});
-                          _loadUsername(); // Refresh the username on the profile screen
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text('Username changed successfully!')));
-                        } catch (e) {
-                          setState(() {
-                            usernameError = 'Failed to change username: $e';
-                          });
-                        }
                       }
                     }
                   },
@@ -213,6 +226,96 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  void _showChangeEmailDialog(Function() onEmailChanged) {
+    TextEditingController emailController = TextEditingController();
+    String? emailError;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Change Email'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: emailController,
+                    decoration: InputDecoration(
+                      labelText: 'New Email',
+                      errorText: emailError,
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    String newEmail = emailController.text.trim();
+
+                    if (newEmail.isEmpty) {
+                      setState(() {
+                        emailError = 'Email cannot be empty.';
+                      });
+                    } else if (!RegExp(r'^[a-zA-Z0-9._%+-]+@gmail\.com$')
+                        .hasMatch(newEmail)) {
+                      setState(() {
+                        emailError = 'Please enter a valid Gmail address.';
+                      });
+                    } else if (newEmail == _email) {
+                      setState(() {
+                        emailError =
+                            'Email is the same as the current one. Please choose a different email.';
+                      });
+                    } else {
+                      try {
+                        // Check if the new email already exists
+                        QuerySnapshot result = await FirebaseFirestore.instance
+                            .collection('users')
+                            .where('email', isEqualTo: newEmail)
+                            .get();
+
+                        if (result.docs.isNotEmpty) {
+                          setState(() {
+                            emailError =
+                                'This email is already in use. Please choose a different one.';
+                          });
+                        } else {
+                          await _user!.verifyBeforeUpdateEmail(newEmail);
+                          await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(_user!.uid)
+                              .update({'email': newEmail});
+                          onEmailChanged(); // Call the callback to update the profile page
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text('Email changed successfully!')));
+                        }
+                      } catch (e) {
+                        setState(() {
+                          emailError = 'Failed to change email: $e';
+                        });
+                      }
+                    }
+                  },
+                  child: Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Color primaryColor = Theme.of(context).primaryColor;
@@ -266,7 +369,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 onTap: _showChangeUsernameDialog,
               ),
             Divider(color: Colors.grey),
-
             // Password Tile
             if (_user != null)
               ListTile(
@@ -278,6 +380,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 trailing: Icon(Icons.edit, color: primaryColor),
                 onTap: _showChangePasswordDialog,
+              ),
+            Divider(color: Colors.grey),
+            // Email Tile
+            if (_user != null)
+              ListTile(
+                title: Row(
+                  children: [
+                    Text('Email: ', style: TextStyle(color: textColor)),
+                    Text(_email, style: TextStyle(color: primaryColor)),
+                  ],
+                ),
+                trailing: Icon(Icons.edit, color: primaryColor),
+                onTap: () => _showChangeEmailDialog(() {
+                  _loadUserData(); // Refresh the profile data
+                }),
               ),
             Divider(color: Colors.grey),
           ],
