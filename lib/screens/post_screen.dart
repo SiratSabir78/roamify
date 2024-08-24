@@ -3,141 +3,139 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:roamify/screens/post_bottom_bar.dart';
 import 'package:roamify/screens/review_screens.dart';
+import 'package:provider/provider.dart';
+import 'package:roamify/screens/favorites_provider.dart';
 
 class PostScreen extends StatelessWidget {
   final String cityName;
   final String description;
   final String imagePath;
-  final String cityId; // Add cityId to navigate to the review page
+  final String cityId;
 
   PostScreen({
     required this.cityName,
     required this.description,
     required this.imagePath,
-    required this.cityId, // Initialize cityId
+    required this.cityId,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isFavorite = context.watch<FavoritesProvider>().isFavorite(cityName);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(cityName),
       ),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              Image.asset(
-                imagePath,
-                height: MediaQuery.of(context).size.height / 2,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-              const SizedBox(height: 20), // Add spacing
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 12.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  backgroundColor: const Color.fromARGB(255, 242, 219, 248),
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ReviewPage(
-                        cityId: cityId,
-                        cityName: cityName,
-                        //cityImageUrl: imagePath,
-                      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Image.asset(
+              imagePath,
+              height: MediaQuery.of(context).size.height / 2,
+              width: double.infinity,
+              fit: BoxFit.fitHeight,
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 12.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
                     ),
-                  );
-                },
-                child: const Text('Write a Review'),
-              ),
-              const SizedBox(height: 20), // Add spacing
-              ElevatedButton(
-                onPressed: () async {
-                  await _addToFavorites(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 12.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.0),
+                    backgroundColor: const Color.fromARGB(255, 242, 219, 248),
                   ),
-                  backgroundColor: const Color.fromARGB(255, 242, 219, 248),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ReviewPage(
+                          cityId: cityId,
+                          cityName: cityName,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Write a Review'),
                 ),
-                child: const Text('Add to Favorites'),
-              ),
-              const SizedBox(height: 20), // Add spacing
-              Expanded(
-                child: PostBottomBar(),
-              ),
-            ],
-          ),
-        ],
+                ElevatedButton(
+                  onPressed: () async {
+                    await _toggleFavorite(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 12.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                    backgroundColor: const Color.fromARGB(255, 242, 219, 248),
+                  ),
+                  child: Text(isFavorite
+                      ? 'Remove from Favorites'
+                      : 'Add to Favorites'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            PostBottomBar(
+              cityName: cityName,
+              description: description,
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Future<void> _addToFavorites(BuildContext context) async {
+  Future<void> _toggleFavorite(BuildContext context) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('You need to be logged in to add favorites'),
+        const SnackBar(
+          content: Text('You need to be logged in to manage favorites'),
           duration: Duration(seconds: 2),
         ),
       );
       return;
     }
 
-    final userId = user.uid;
-    final userDoc = FirebaseFirestore.instance.collection('users').doc(userId);
+    final userDoc =
+        FirebaseFirestore.instance.collection('users').doc(user.uid);
+    final isFavorite = context.read<FavoritesProvider>().isFavorite(cityName);
 
     try {
-      final userDocSnapshot = await userDoc.get();
-      if (!userDocSnapshot.exists) {
-        // Handle case where user document doesn't exist
+      if (isFavorite) {
+        await userDoc.update({
+          'favoriteCities': FieldValue.arrayRemove([cityName])
+        });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('User data not found.'),
+          const SnackBar(
+            content: Text('Removed from your favorites'),
             duration: Duration(seconds: 2),
           ),
         );
-        return;
-      }
-
-      final userData = userDocSnapshot.data()!;
-      final List<dynamic> favorites = userData['favoriteCities'] ?? [];
-
-      if (favorites.contains(cityName)) {
+      } else {
+        await userDoc.update({
+          'favoriteCities': FieldValue.arrayUnion([cityName])
+        });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('City already in favorites.'),
+          const SnackBar(
+            content: Text('Added to your favorites'),
             duration: Duration(seconds: 2),
           ),
         );
-        return;
       }
 
-      await userDoc.update({
-        'favoriteCities': FieldValue.arrayUnion([cityName])
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Added to your favorites'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      // Notify the provider to update the state globally
+      context.read<FavoritesProvider>().toggleFavorite(cityName);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error adding to favorites'),
+        const SnackBar(
+          content: Text('Error updating favorites'),
           duration: Duration(seconds: 2),
         ),
       );

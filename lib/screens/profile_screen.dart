@@ -1,6 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -10,7 +13,10 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final User? _user = FirebaseAuth.instance.currentUser;
   String _username = '';
-  String _email = '';
+  String _gender = 'Male'; // Default to male, change as necessary
+  String _profileImagePath = 'images/male_default.png'; // Default profile image
+
+  final picker = ImagePicker();
 
   @override
   void initState() {
@@ -29,8 +35,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (userDoc.exists) {
           setState(() {
             _username = userDoc['username'] ?? '';
-            _email = userDoc['email'] ?? '';
-            // _lastEmailChangeDate = (userDoc['lastEmailChange'] as Timestamp?)?.toDate();
+            _gender =
+                userDoc['gender'] ?? 'Male'; // Default to male if not specified
+
+            // Set the profile image based on gender
+            _profileImagePath = userDoc['profileImagePath'] ??
+                (_gender == 'Female'
+                    ? 'images/female_default.png'
+                    : 'images/male_default.png');
           });
         } else {
           print('User document does not exist');
@@ -43,6 +55,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     } else {
       print('User is not authenticated');
+    }
+  }
+
+  Future<void> _pickAndUploadImage() async {
+    try {
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+      if (pickedFile != null) {
+        File imageFile = File(pickedFile.path);
+        String fileName = '${_user!.uid}.png';
+        print('Uploading image: ${imageFile.path}');
+
+        // Upload the image to Firebase Storage
+        UploadTask uploadTask =
+            FirebaseStorage.instance.ref().child(fileName).putFile(imageFile);
+
+        // Wait for the upload to complete
+        TaskSnapshot snapshot = await uploadTask;
+        print('Upload complete. Getting download URL...');
+
+        String downloadUrl = await snapshot.ref.getDownloadURL();
+        print('Download URL: $downloadUrl');
+
+        // Update the user's profile image URL in Firestore
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(_user!.uid)
+            .update({'profileImagePath': downloadUrl});
+
+        setState(() {
+          _profileImagePath = downloadUrl;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Profile picture updated successfully!'),
+        ));
+      } else {
+        print('No image selected.');
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('No image selected.'),
+        ));
+      }
+    } catch (e) {
+      print('Error uploading image: $e');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Error uploading image: $e'),
+      ));
     }
   }
 
@@ -78,31 +137,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 TextButton(
                   onPressed: () async {
-                    String newUsername = usernameController.text.trim();
+                    if (_user != null) {
+                      String newUsername = usernameController.text.trim();
 
-                    if (newUsername.isEmpty) {
-                      setState(() {
-                        usernameError = 'Username cannot be empty.';
-                      });
-                    } else if (newUsername == _username) {
-                      setState(() {
-                        usernameError =
-                            'Username is the same as the current one. Please choose a different username.';
-                      });
-                    } else {
-                      try {
-                        await FirebaseFirestore.instance
-                            .collection('users')
-                            .doc(_user!.uid)
-                            .update({'username': newUsername});
-                        _loadUserData(); // Refresh the username on the profile screen
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text('Username changed successfully!')));
-                      } catch (e) {
+                      if (newUsername == _username) {
                         setState(() {
-                          usernameError = 'Failed to change username: $e';
+                          usernameError =
+                              'Username is the same as the current one. Please choose a different username.';
                         });
+                      } else if (newUsername.isEmpty) {
+                        setState(() {
+                          usernameError = 'Username cannot be empty.';
+                        });
+                      } else {
+                        try {
+                          await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(_user!.uid)
+                              .update({'username': newUsername});
+                          _loadUserData(); // Refresh the username on the profile screen
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text('Username changed successfully!')));
+                        } catch (e) {
+                          setState(() {
+                            usernameError = 'Failed to change username: $e';
+                          });
+                        }
                       }
                     }
                   },
@@ -226,96 +287,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _showChangeEmailDialog(Function() onEmailChanged) {
-    TextEditingController emailController = TextEditingController();
-    String? emailError;
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text('Change Email'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: emailController,
-                    decoration: InputDecoration(
-                      labelText: 'New Email',
-                      errorText: emailError,
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    String newEmail = emailController.text.trim();
-
-                    if (newEmail.isEmpty) {
-                      setState(() {
-                        emailError = 'Email cannot be empty.';
-                      });
-                    } else if (!RegExp(r'^[a-zA-Z0-9._%+-]+@gmail\.com$')
-                        .hasMatch(newEmail)) {
-                      setState(() {
-                        emailError = 'Please enter a valid Gmail address.';
-                      });
-                    } else if (newEmail == _email) {
-                      setState(() {
-                        emailError =
-                            'Email is the same as the current one. Please choose a different email.';
-                      });
-                    } else {
-                      try {
-                        // Check if the new email already exists
-                        QuerySnapshot result = await FirebaseFirestore.instance
-                            .collection('users')
-                            .where('email', isEqualTo: newEmail)
-                            .get();
-
-                        if (result.docs.isNotEmpty) {
-                          setState(() {
-                            emailError =
-                                'This email is already in use. Please choose a different one.';
-                          });
-                        } else {
-                          await _user!.verifyBeforeUpdateEmail(newEmail);
-                          await FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(_user!.uid)
-                              .update({'email': newEmail});
-                          onEmailChanged(); // Call the callback to update the profile page
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text('Email changed successfully!')));
-                        }
-                      } catch (e) {
-                        setState(() {
-                          emailError = 'Failed to change email: $e';
-                        });
-                      }
-                    }
-                  },
-                  child: Text('Save'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     Color primaryColor = Theme.of(context).primaryColor;
@@ -337,20 +308,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   CircleAvatar(
                     radius: 50,
-                    backgroundImage:
-                        AssetImage('images/profile_placeholder.png'),
+                    backgroundImage: NetworkImage(_profileImagePath),
                   ),
                   SizedBox(height: 8),
-                  TextButton(
-                    onPressed: () {
-                      // TODO: Implement profile picture change functionality
-                    },
-                    child: Text(
-                      'Change Profile Picture',
-                      style:
-                          TextStyle(color: Color.fromARGB(255, 221, 128, 244)),
-                    ),
-                  ),
+                  //  TextButton(
+                  //  onPressed: _pickAndUploadImage,
+                  // child: Text(
+                  //   'Change Profile Picture',
+                  //   style:
+                  //       TextStyle(color: Color.fromARGB(255, 221, 128, 244)),
+                  // ),
+                  //  ),
                 ],
               ),
             ),
@@ -369,6 +337,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 onTap: _showChangeUsernameDialog,
               ),
             Divider(color: Colors.grey),
+
             // Password Tile
             if (_user != null)
               ListTile(
@@ -380,21 +349,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 trailing: Icon(Icons.edit, color: primaryColor),
                 onTap: _showChangePasswordDialog,
-              ),
-            Divider(color: Colors.grey),
-            // Email Tile
-            if (_user != null)
-              ListTile(
-                title: Row(
-                  children: [
-                    Text('Email: ', style: TextStyle(color: textColor)),
-                    Text(_email, style: TextStyle(color: primaryColor)),
-                  ],
-                ),
-                trailing: Icon(Icons.edit, color: primaryColor),
-                onTap: () => _showChangeEmailDialog(() {
-                  _loadUserData(); // Refresh the profile data
-                }),
               ),
             Divider(color: Colors.grey),
           ],

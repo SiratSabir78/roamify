@@ -1,8 +1,10 @@
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:roamify/screens/login_screen.dart';
 import 'package:roamify/screens/validation_for_signup.dart';
 
@@ -21,6 +23,9 @@ class _SignUpState extends State<SignUp> {
   final _formKey = GlobalKey<FormState>();
 
   String? usernameError; // Store the error message for the username field
+  String? selectedGender; // Store the selected gender
+  String? profileImagePath; // Store the profile image URL
+  final ImagePicker picker = ImagePicker();
 
   Future<void> signup() async {
     if (_formKey.currentState!.validate()) {
@@ -49,11 +54,11 @@ class _SignUpState extends State<SignUp> {
             .set({
           'username': usernameController.text.trim(),
           'email': emailController.text.trim(),
-          'profilePicture': '', // Initially empty
+          'profilePicture': profileImagePath ??
+              'assets/images/default_profile.png', // Set the profile picture URL
           'favoriteCities': [], // Initially empty list
-          'bookmarkedCities': [], // Initially empty list
           'phoneNumber': phoneController.text.trim(), // Store phone number
-          'travelHistory': [], // Initially empty list
+          'gender': selectedGender ?? '', // Store gender
           'userId': userCredential.user!.uid,
         });
 
@@ -82,7 +87,36 @@ class _SignUpState extends State<SignUp> {
     }
   }
 
+  Future<void> _pickAndUploadImage() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
+    if (pickedFile != null) {
+      File imageFile = File(pickedFile.path);
+      String fileName = '${DateTime.now().millisecondsSinceEpoch}.png';
+      try {
+        // Upload the image to Firebase Storage
+        UploadTask uploadTask =
+            FirebaseStorage.instance.ref().child(fileName).putFile(imageFile);
+
+        // Wait for the upload to complete
+        TaskSnapshot snapshot = await uploadTask;
+        String downloadUrl = await snapshot.ref.getDownloadURL();
+
+        setState(() {
+          profileImagePath = downloadUrl;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Profile picture updated successfully!'),
+        ));
+      } catch (e) {
+        print('Error uploading image: $e');
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error uploading image: $e'),
+        ));
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,16 +137,20 @@ class _SignUpState extends State<SignUp> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
-                        height: 200,
-                        width: 200,
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage("images/Roamify.png"),
-                            fit: BoxFit.cover,
-                          ),
+                      GestureDetector(
+                        onTap: _pickAndUploadImage,
+                        child: CircleAvatar(
+                          radius: 60,
+                          backgroundImage: profileImagePath != null
+                              ? NetworkImage(profileImagePath!)
+                              : AssetImage('assets/images/default_profile.png')
+                                  as ImageProvider,
+                          child: profileImagePath == null
+                              ? const Icon(Icons.camera_alt, size: 40)
+                              : null,
                         ),
                       ),
+                      const SizedBox(height: 15),
                       TextFormField(
                         controller: usernameController,
                         decoration: InputDecoration(
@@ -134,7 +172,6 @@ class _SignUpState extends State<SignUp> {
                           });
                         },
                       ),
-
                       const SizedBox(height: 15),
                       TextFormField(
                         controller: emailController,
@@ -173,6 +210,28 @@ class _SignUpState extends State<SignUp> {
                           ),
                         ),
                         validator: (value) => validatePassword(value),
+                      ),
+                      const SizedBox(height: 15),
+                      DropdownButtonFormField<String>(
+                        value: selectedGender,
+                        hint: const Text('Select Gender'),
+                        items: <String>['Male', 'Female']
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            selectedGender = newValue;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
