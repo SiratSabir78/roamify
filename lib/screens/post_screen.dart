@@ -1,27 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:roamify/screens/post_bottom_bar.dart';
 import 'package:roamify/screens/review_screens.dart';
+import 'package:roamify/screens/state.dart';
 
 class PostScreen extends StatelessWidget {
   final String cityName;
   final String description;
   final String imagePath;
-  final String cityId; // Add cityId to navigate to the review page
+  final String cityId;
 
   PostScreen({
     required this.cityName,
     required this.description,
     required this.imagePath,
-    required this.cityId, // Initialize cityId
+    required this.cityId,
   });
 
   @override
   Widget build(BuildContext context) {
+    final settingsProvider = Provider.of<SettingsModel>(context);
+    final isDarkMode = settingsProvider.darkMode; // Determine dark mode
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(cityName),
+        title: Text(
+          cityName,
+          style: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
+        ),
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        iconTheme:
+            IconThemeData(color: isDarkMode ? Colors.white : Colors.black),
       ),
       body: Stack(
         children: [
@@ -41,7 +54,9 @@ class PostScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20.0),
                   ),
-                  backgroundColor: const Color.fromARGB(255, 242, 219, 248),
+                  backgroundColor: isDarkMode
+                      ? Colors.grey[800]
+                      : const Color.fromARGB(255, 242, 219, 248),
                 ),
                 onPressed: () {
                   Navigator.push(
@@ -50,13 +65,16 @@ class PostScreen extends StatelessWidget {
                       builder: (context) => ReviewPage(
                         cityId: cityId,
                         cityName: cityName,
-
-                        //cityImageUrl: imagePath,
                       ),
                     ),
                   );
                 },
-                child: const Text('Write a Review'),
+                child: Text(
+                  'Write a Review',
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  ),
+                ),
               ),
               const SizedBox(height: 20), // Add spacing
               ElevatedButton(
@@ -69,9 +87,16 @@ class PostScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20.0),
                   ),
-                  backgroundColor: const Color.fromARGB(255, 242, 219, 248),
+                  backgroundColor: isDarkMode
+                      ? Colors.grey[800]
+                      : const Color.fromARGB(255, 242, 219, 248),
                 ),
-                child: const Text('Add to Favorites'),
+                child: Text(
+                  'Add to Favorites',
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  ),
+                ),
               ),
               const SizedBox(height: 20), // Add spacing
               Expanded(
@@ -81,6 +106,7 @@ class PostScreen extends StatelessWidget {
           ),
         ],
       ),
+      backgroundColor: isDarkMode ? Colors.black : Colors.white,
     );
   }
 
@@ -102,7 +128,6 @@ class PostScreen extends StatelessWidget {
     try {
       final userDocSnapshot = await userDoc.get();
       if (!userDocSnapshot.exists) {
-        // Handle case where user document doesn't exist
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('User data not found.'),

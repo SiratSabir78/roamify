@@ -160,8 +160,9 @@ class ReviewScreen extends StatelessWidget {
     try {
       print('Updating review with ID: $reviewId');
 
+      // Update the main 'reviews' collection
       await firestore.collection('reviews').doc(reviewId).update({
-        'review': newReviewText,
+        'reviewText': newReviewText,
         'rating': newRating,
         'timestamp': Timestamp.fromDate(DateTime.now()), // Update timestamp
       });
@@ -170,16 +171,30 @@ class ReviewScreen extends StatelessWidget {
       var citiesSnapshot = await firestore.collection('cities').get();
       for (var cityDoc in citiesSnapshot.docs) {
         var cityId = cityDoc.id;
-        await firestore
+        var reviewDocRef = firestore
             .collection('cities')
             .doc(cityId)
             .collection('reviews')
-            .doc(reviewId)
-            .update({
-          'review': newReviewText,
-          'rating': newRating,
-          'timestamp': Timestamp.fromDate(DateTime.now()), // Update timestamp
-        });
+            .doc(reviewId);
+
+        // Check if the document exists before updating
+        var docSnapshot = await reviewDocRef.get();
+        if (docSnapshot.exists) {
+          try {
+            await reviewDocRef.update({
+              'reviewText': newReviewText,
+              'rating': newRating,
+              'timestamp':
+                  Timestamp.fromDate(DateTime.now()), // Update timestamp
+            });
+            print('Updated review in city collection for cityId $cityId');
+          } catch (e) {
+            print(
+                'Error updating review in city collection for cityId $cityId: $e');
+          }
+        } else {
+          print('No document to update in city collection for cityId $cityId');
+        }
       }
 
       // Update in the user's 'reviews' sub-collection
@@ -189,7 +204,7 @@ class ReviewScreen extends StatelessWidget {
           .collection('reviews')
           .doc(reviewId)
           .update({
-        'review': newReviewText,
+        'reviewText': newReviewText,
         'rating': newRating,
         'timestamp': Timestamp.fromDate(DateTime.now()), // Update timestamp
       });
@@ -293,7 +308,7 @@ class Review {
   final String reviewId;
   final String userId;
   final String cityId;
-  final String reviewText;
+  final String reviewText; // Ensure this matches the Firestore field name
   final double rating;
   final DateTime date;
 
@@ -311,7 +326,8 @@ class Review {
       reviewId: reviewId,
       userId: data['userId'] ?? '',
       cityId: data['cityId'] ?? '',
-      reviewText: data['review'] ?? '',
+      reviewText: data['reviewText'] ??
+          '', // Ensure this matches the Firestore field name
       rating: data['rating']?.toDouble() ?? 0.0,
       date: (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
