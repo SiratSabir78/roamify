@@ -84,6 +84,9 @@ flutter:
     - images/bgwelcomeScreen.jpeg
     - images/Trave.jpeg
     - images/travel.jpeg
+    - images/male_default.png
+    - images/female_default.png
+
 
   #   - images/a_dot_ham.jpeg
 
