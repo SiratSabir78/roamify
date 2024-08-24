@@ -22,7 +22,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_user != null) {
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
           .collection('users')
-          .doc(_user!.uid)
+          .doc(_user.uid)
           .get();
 
       setState(() {
@@ -79,7 +79,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         try {
                           await FirebaseFirestore.instance
                               .collection('users')
-                              .doc(_user!.uid)
+                              .doc(_user.uid)
                               .update({'username': newUsername});
                           _loadUsername(); // Refresh the username on the profile screen
                           Navigator.pop(context);
@@ -192,8 +192,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       AuthCredential credential = EmailAuthProvider.credential(
                           email: _user!.email!,
                           password: currentPasswordController.text);
-                      await _user!.reauthenticateWithCredential(credential);
-                      await _user!.updatePassword(newPasswordController.text);
+                      await _user.reauthenticateWithCredential(credential);
+                      await _user.updatePassword(newPasswordController.text);
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           content: Text('Password changed successfully!')));
@@ -221,8 +221,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Profile Settings'),
-        backgroundColor: primaryColor,
-        centerTitle: true,
+        backgroundColor: Color.fromARGB(255, 221, 128, 244),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),

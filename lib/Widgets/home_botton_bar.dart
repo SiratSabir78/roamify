@@ -1,6 +1,5 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:roamify/screens/home_screen.dart';
 import 'package:roamify/screens/favorites_screen.dart';
 import 'package:roamify/screens/profile_screen.dart';
 import 'package:roamify/screens/booking_page.dart';

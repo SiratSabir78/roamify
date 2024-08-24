@@ -26,7 +26,7 @@ class BookingPage extends StatelessWidget {
       appBar: AppBar(
         title: Text("My Bookings"),
         backgroundColor:
-            settingsProvider.darkMode ? Colors.purple[700] : Colors.purple[300],
+            settingsProvider.darkMode ? const Color.fromARGB(255, 221, 128, 244) : Colors.purple[300],
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -61,14 +61,12 @@ class BookingPage extends StatelessWidget {
                 builder: (context, citySnapshot) {
                   String cityName = 'Unknown';
                   String tripDescription = 'No description available';
-                  int tripPricePerDay = 0;
 
                   if (citySnapshot.connectionState == ConnectionState.done) {
                     if (citySnapshot.hasData) {
                       cityName = citySnapshot.data?.get('name') ?? 'Unknown';
                       tripDescription = citySnapshot.data?.get('data') ??
                           'No description available';
-                      tripPricePerDay = citySnapshot.data?.get('price') ?? 0;
                     }
                   }
 

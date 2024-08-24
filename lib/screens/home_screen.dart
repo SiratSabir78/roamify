@@ -6,7 +6,6 @@ import 'package:roamify/screens/booking_page.dart';
 import 'package:roamify/screens/favorites_provider.dart';
 import 'package:roamify/screens/favorites_screen.dart';
 import 'package:roamify/screens/profile_screen.dart';
-import 'package:roamify/screens/search_screen.dart';
 import 'package:roamify/screens/post_screen.dart';
 import 'package:roamify/screens/app_setting_screen.dart';
 import 'package:roamify/screens/signout.dart';
@@ -27,7 +26,6 @@ class _HomePageState extends State<HomePage> {
     FavoriteScreen(),
     HomeContent(), // Home screen content widget
     BookingPage(), // Updated BookingPage without cityId
-    SearchScreen(),
   ];
 
   @override
@@ -135,7 +133,6 @@ class _HomePageState extends State<HomePage> {
               size: 30, color: settingsProvider.iconColor),
           Icon(Icons.home, size: 30, color: settingsProvider.iconColor),
           Icon(Icons.menu_book, size: 30, color: settingsProvider.iconColor),
-          Icon(Icons.list, size: 30, color: settingsProvider.iconColor),
         ],
         onTap: (index) {
           setState(() {
