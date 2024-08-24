@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:roamify/screens/state.dart';
 
 class PostBottomBar extends StatelessWidget {
   final String cityName;

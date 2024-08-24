@@ -6,6 +6,7 @@ import 'package:roamify/screens/post_bottom_bar.dart';
 import 'package:roamify/screens/review_screens.dart';
 import 'package:provider/provider.dart';
 import 'package:roamify/screens/favorites_provider.dart';
+import 'package:roamify/screens/state.dart';
 
 class PostScreen extends StatelessWidget {
   final String cityName;
