@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -11,23 +13,95 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final User? _user = FirebaseAuth.instance.currentUser;
   String _username = '';
+  String _gender = 'Male'; // Default to male, change as necessary
+  String _profileImagePath = 'images/male_default.png'; // Default profile image
+
+  final picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    _loadUsername();
+    _loadUserData();
   }
 
-  void _loadUsername() async {
+  void _loadUserData() async {
     if (_user != null) {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(_user!.uid)
-          .get();
+      try {
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(_user!.uid)
+            .get();
 
-      setState(() {
-        _username = userDoc['username'];
-      });
+        if (userDoc.exists) {
+          setState(() {
+            _username = userDoc['username'] ?? '';
+            _gender =
+                userDoc['gender'] ?? 'Male'; // Default to male if not specified
+
+            // Set the profile image based on gender
+            _profileImagePath = userDoc['profileImagePath'] ??
+                (_gender == 'Female'
+                    ? 'images/female_default.png'
+                    : 'images/male_default.png');
+          });
+        } else {
+          print('User document does not exist');
+        }
+      } catch (e) {
+        print('Error loading user data: $e');
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error loading user data: $e'),
+        ));
+      }
+    } else {
+      print('User is not authenticated');
+    }
+  }
+
+  Future<void> _pickAndUploadImage() async {
+    try {
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+      if (pickedFile != null) {
+        File imageFile = File(pickedFile.path);
+        String fileName = '${_user!.uid}.png';
+        print('Uploading image: ${imageFile.path}');
+
+        // Upload the image to Firebase Storage
+        UploadTask uploadTask =
+            FirebaseStorage.instance.ref().child(fileName).putFile(imageFile);
+
+        // Wait for the upload to complete
+        TaskSnapshot snapshot = await uploadTask;
+        print('Upload complete. Getting download URL...');
+
+        String downloadUrl = await snapshot.ref.getDownloadURL();
+        print('Download URL: $downloadUrl');
+
+        // Update the user's profile image URL in Firestore
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(_user!.uid)
+            .update({'profileImagePath': downloadUrl});
+
+        setState(() {
+          _profileImagePath = downloadUrl;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Profile picture updated successfully!'),
+        ));
+      } else {
+        print('No image selected.');
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('No image selected.'),
+        ));
+      }
+    } catch (e) {
+      print('Error uploading image: $e');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Error uploading image: $e'),
+      ));
     }
   }
 
@@ -81,7 +155,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               .collection('users')
                               .doc(_user!.uid)
                               .update({'username': newUsername});
-                          _loadUsername(); // Refresh the username on the profile screen
+                          _loadUserData(); // Refresh the username on the profile screen
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                               content: Text('Username changed successfully!')));
@@ -234,20 +308,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   CircleAvatar(
                     radius: 50,
-                    backgroundImage:
-                        AssetImage('images/profile_placeholder.png'),
+                    backgroundImage: NetworkImage(_profileImagePath),
                   ),
                   SizedBox(height: 8),
-                  TextButton(
-                    onPressed: () {
-                      // TODO: Implement profile picture change functionality
-                    },
-                    child: Text(
-                      'Change Profile Picture',
-                      style:
-                          TextStyle(color: Color.fromARGB(255, 221, 128, 244)),
-                    ),
-                  ),
+                  //  TextButton(
+                  //  onPressed: _pickAndUploadImage,
+                  // child: Text(
+                  //   'Change Profile Picture',
+                  //   style:
+                  //       TextStyle(color: Color.fromARGB(255, 221, 128, 244)),
+                  // ),
+                  //  ),
                 ],
               ),
             ),
