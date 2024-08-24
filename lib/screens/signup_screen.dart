@@ -20,6 +20,7 @@ class _SignUpState extends State<SignUp> {
   final _formKey = GlobalKey<FormState>();
 
   String? usernameError; // Store the error message for the username field
+  String? selectedGender; // Store the selected gender
 
   Future<void> signup() async {
     if (_formKey.currentState!.validate()) {
@@ -32,6 +33,11 @@ class _SignUpState extends State<SignUp> {
         });
         return;
       }
+
+      // Determine the default profile picture based on the selected gender
+      String profilePicture = selectedGender == 'Female'
+          ? 'assets/images/female_default.png'
+          : 'assets/images/male_default.png';
 
       try {
         // Create user with email and password
@@ -48,11 +54,10 @@ class _SignUpState extends State<SignUp> {
             .set({
           'username': usernameController.text.trim(),
           'email': emailController.text.trim(),
-          'profilePicture': '', // Initially empty
+          'profilePicture': profilePicture, // Set the default profile picture
           'favoriteCities': [], // Initially empty list
-          'bookmarkedCities': [], // Initially empty list
           'phoneNumber': phoneController.text.trim(), // Store phone number
-          'travelHistory': [], // Initially empty list
+          'gender': selectedGender ?? '', // Store gender
           'userId': userCredential.user!.uid,
         });
 
@@ -107,7 +112,7 @@ class _SignUpState extends State<SignUp> {
                         width: 200,
                         decoration: const BoxDecoration(
                           image: DecorationImage(
-                            image: AssetImage("images/Roamify.png"),
+                            image: AssetImage("assets/images/Roamify.png"),
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -133,7 +138,6 @@ class _SignUpState extends State<SignUp> {
                           });
                         },
                       ),
-
                       const SizedBox(height: 15),
                       TextFormField(
                         controller: emailController,
@@ -172,6 +176,28 @@ class _SignUpState extends State<SignUp> {
                           ),
                         ),
                         validator: (value) => validatePassword(value),
+                      ),
+                      const SizedBox(height: 15),
+                      DropdownButtonFormField<String>(
+                        value: selectedGender,
+                        hint: const Text('Select Gender'),
+                        items: <String>['Male', 'Female']
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            selectedGender = newValue;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(

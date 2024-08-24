@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:roamify/screens/home_screen.dart';
 
+
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
@@ -11,7 +12,7 @@ class WelcomeScreen extends StatelessWidget {
             image: DecorationImage(
                 image: AssetImage("images/bgwelcomeScreen.jpeg"),
                 fit: BoxFit.cover,
-                opacity: 0.7)),
+                opacity: 0.8)),
         child: Material(
           color: Colors.transparent,
           child: SafeArea(
