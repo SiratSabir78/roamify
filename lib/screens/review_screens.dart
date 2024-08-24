@@ -1,121 +1,231 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:roamify/screens/state.dart';
 
 class ReviewPage extends StatefulWidget {
   final String cityId;
   final String cityName;
 
-  const ReviewPage({
-    super.key,
-    required this.cityId,
-    required this.cityName,
-  });
+  ReviewPage({required this.cityId, required this.cityName});
 
   @override
-  State<ReviewPage> createState() => _ReviewPageState();
+  _ReviewPageState createState() => _ReviewPageState();
 }
 
 class _ReviewPageState extends State<ReviewPage> {
-  double _rating = 0;
-  final TextEditingController _reviewController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final _reviewController = TextEditingController();
+  double _rating = 3.0;
+
+  @override
+  void dispose() {
+    _reviewController.dispose();
+    super.dispose();
+  }
 
   Future<void> submitReview() async {
     if (_formKey.currentState!.validate()) {
-      final User? user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('You need to be logged in to submit a review.')),
-        );
-        return;
-      }
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
 
-      final String userId = user.uid;
-      final String review = _reviewController.text.trim();
-      final String reviewId =
+      String userId = user.uid;
+      String reviewId =
           FirebaseFirestore.instance.collection('reviews').doc().id;
+      String cityId = widget.cityId;
 
-      final reviewData = {
-        'reviewId': reviewId,
-        'userId': userId,
-        'cityId': widget.cityId,
-        'rating': _rating,
-        'review': review,
-        'timestamp': FieldValue.serverTimestamp(),
-      };
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final reviewData = {
+          'reviewId': reviewId,
+          'userId': userId,
+          'cityId': cityId,
+          'rating': _rating,
+          'reviewText': _reviewController.text,
+          'timestamp': FieldValue.serverTimestamp(),
+        };
 
-      try {
-        // 1. Save to Reviews Collection
-        await FirebaseFirestore.instance
-            .collection('reviews')
-            .doc(reviewId)
-            .set(reviewData);
-
-        // 2. Reference Review ID in City Database
-        await FirebaseFirestore.instance
-            .collection('cities')
-            .doc(widget.cityId)
-            .collection('reviews')
-            .doc(reviewId)
-            .set(reviewData);
-
-        // 3. Reference Review ID in User Database
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userId)
-            .collection('reviews')
-            .doc(reviewId)
-            .set({
-          'cityId': widget.cityId,
-          'cityName': widget.cityName,
-          ...reviewData,
-        });
-
-        // Clear form after submission
-        _reviewController.clear();
-        setState(() {
-          _rating = 0;
-        });
-
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Review submitted successfully!')),
+        // Add review to 'reviews' collection
+        transaction.set(
+          FirebaseFirestore.instance.collection('reviews').doc(reviewId),
+          reviewData,
         );
-      } catch (e) {
-        // Show error message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to submit review: $e')),
+
+        // Add review to 'cities' sub-collection
+        transaction.set(
+          FirebaseFirestore.instance
+              .collection('cities')
+              .doc(cityId)
+              .collection('reviews')
+              .doc(reviewId),
+          reviewData,
         );
-      }
+
+        // Add review to user's 'reviews' sub-collection
+        transaction.set(
+          FirebaseFirestore.instance
+              .collection('users')
+              .doc(userId)
+              .collection('reviews')
+              .doc(reviewId),
+          reviewData,
+        );
+      });
+
+      // Clear the form
+      _reviewController.clear();
+      setState(() {
+        _rating = 3.0;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Review submitted successfully')),
+      );
     }
   }
 
-  Future<DocumentSnapshot> _fetchCityName(String cityId) async {
-    return FirebaseFirestore.instance.collection('cities').doc(cityId).get();
-  }
+  @override
+  Widget build(BuildContext context) {
+    final settingsProvider = Provider.of<SettingsModel>(context);
+    final isDarkMode = settingsProvider.darkMode;
+    final fontSize = settingsProvider.fontSize;
 
-  Future<bool> _showConfirmationDialog(BuildContext context) async {
-    return await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text("Confirm Delete"),
-            content: Text("Are you sure you want to delete this review?"),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: Text("Cancel"),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Write a Review', style: TextStyle(fontSize: fontSize)),
+        backgroundColor: isDarkMode ? Colors.grey[850] : Colors.purple[300],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Write a review about ${widget.cityName}',
+              style: TextStyle(
+                fontSize: fontSize,
+                fontWeight: FontWeight.bold,
+                color: isDarkMode ? Colors.white : Colors.black,
               ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: Text("Delete"),
+            ),
+            const SizedBox(height: 20),
+            Slider(
+              value: _rating,
+              onChanged: (newRating) {
+                setState(() => _rating = newRating);
+              },
+              min: 0,
+              max: 5,
+              divisions: 5,
+              label: _rating.toString(),
+              activeColor: isDarkMode ? const Color.fromARGB(255, 221, 128, 244) : const Color.fromARGB(255, 221, 128, 244),
+              inactiveColor: isDarkMode ? Colors.grey[700] : Colors.grey[400],
+            ),
+            const SizedBox(height: 20),
+            Form(
+              key: _formKey,
+              child: TextFormField(
+                controller: _reviewController,
+                maxLines: 4,
+                decoration: InputDecoration(
+                  hintText: 'Write your review',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  filled: true,
+                  fillColor: isDarkMode ? Colors.grey[800] : Colors.white,
+                ),
+                style: TextStyle(
+                    fontSize: fontSize,
+                    color: isDarkMode ? Colors.white : Colors.black),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please write a review';
+                  }
+                  return null;
+                },
               ),
-            ],
-          ),
-        ) ??
-        false;
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 12.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+                backgroundColor:
+                    isDarkMode ? const Color.fromARGB(255, 221, 128, 244) : Color.fromRGBO(255, 221, 128, 244),
+              ),
+              onPressed: submitReview,
+              child:
+                  Text('Submit Review', style: TextStyle(fontSize: fontSize)),
+            ),
+            const SizedBox(height: 20),
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('reviews')
+                  .where('cityId', isEqualTo: widget.cityId)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(child: Text("No reviews found."));
+                }
+
+                final reviews = snapshot.data!.docs;
+
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: reviews.length,
+                  itemBuilder: (context, index) {
+                    var review = reviews[index].data() as Map<String, dynamic>;
+                    var reviewId = review['reviewId'] ?? 'Unknown';
+                    var userId = review['userId'] ?? 'Unknown';
+                    var rating = review['rating'] ?? 0;
+                    var reviewText = review['reviewText'] ?? '';
+
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 10),
+                      color: isDarkMode ? Colors.grey[850] : Colors.white,
+                      child: ListTile(
+                        title: Text('Rating: $rating stars',
+                            style: TextStyle(
+                                fontSize: fontSize,
+                                color:
+                                    isDarkMode ? Colors.white : Colors.black)),
+                        subtitle: Text(reviewText,
+                            style: TextStyle(
+                                fontSize: fontSize,
+                                color: isDarkMode
+                                    ? Colors.white70
+                                    : Colors.black87)),
+                        trailing: IconButton(
+                          icon: Icon(Icons.delete,
+                              color:
+                                  isDarkMode ? Colors.redAccent : Colors.red),
+                          onPressed: () async {
+                            bool confirmed =
+                                await _showConfirmationDialog(context);
+                            if (confirmed) {
+                              await _deleteReview(
+                                  reviewId, widget.cityId, userId);
+                            }
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _deleteReview(
@@ -152,8 +262,8 @@ class _ReviewPageState extends State<ReviewPage> {
           }
         }
 
-        // Delete from the 'reviews' sub-collection within the user
-        QuerySnapshot userCollectionReviewSnapshot = await firestore
+        // Delete from the user's 'reviews' sub-collection
+        QuerySnapshot userReviewSnapshot = await firestore
             .collection('users')
             .doc(userId)
             .collection('reviews')
@@ -161,8 +271,8 @@ class _ReviewPageState extends State<ReviewPage> {
             .limit(1)
             .get();
 
-        if (userCollectionReviewSnapshot.docs.isNotEmpty) {
-          for (var doc in userCollectionReviewSnapshot.docs) {
+        if (userReviewSnapshot.docs.isNotEmpty) {
+          for (var doc in userReviewSnapshot.docs) {
             transaction.delete(doc.reference);
           }
         }
@@ -172,171 +282,34 @@ class _ReviewPageState extends State<ReviewPage> {
     }
   }
 
-  void _showDetailsDialog(
-      BuildContext context, String cityName, DateTime date) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Review Details'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'City Name: $cityName',
-                style: Theme.of(context).textTheme.headline6,
+  Future<bool> _showConfirmationDialog(BuildContext context) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("Confirm Delete",
+                style: TextStyle(
+                    fontSize: Provider.of<SettingsModel>(context).fontSize)),
+            content: Text("Are you sure you want to delete this review?",
+                style: TextStyle(
+                    fontSize: Provider.of<SettingsModel>(context).fontSize)),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text("Cancel",
+                    style: TextStyle(
+                        fontSize:
+                            Provider.of<SettingsModel>(context).fontSize)),
               ),
-              SizedBox(height: 8),
-              Text(
-                'Review Date: ${DateFormat('yyyy-MM-dd').format(date)}',
-                style: Theme.of(context).textTheme.subtitle1,
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text("Delete",
+                    style: TextStyle(
+                        fontSize:
+                            Provider.of<SettingsModel>(context).fontSize)),
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Write a Review'),
-        backgroundColor: const Color.fromARGB(255, 242, 219, 248),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            Text(
-              'Write a review about ${widget.cityName}',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            // Star Rating
-            Slider(
-              value: _rating,
-              onChanged: (newRating) {
-                setState(() => _rating = newRating);
-              },
-              min: 0,
-              max: 5,
-              divisions: 5,
-              label: _rating.toString(),
-            ),
-            const SizedBox(height: 20),
-            TextFormField(
-              controller: _reviewController,
-              maxLines: 4,
-              decoration: InputDecoration(
-                hintText: 'Write your review',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please write a review';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0, vertical: 12.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                backgroundColor: const Color.fromARGB(255, 242, 219, 248),
-              ),
-              onPressed: submitReview,
-              child: const Text('Submit Review'),
-            ),
-            const SizedBox(height: 20),
-            StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('cities')
-                  .doc(widget.cityId)
-                  .collection('reviews')
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(child: Text("No reviews found."));
-                }
-
-                final reviews = snapshot.data!.docs;
-
-                return ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: reviews.length,
-                  itemBuilder: (context, index) {
-                    var review = reviews[index].data() as Map<String, dynamic>;
-                    var reviewId = review['reviewId'] ?? 'Unknown';
-                    var userId = review['userId'] ?? 'Unknown';
-                    var rating = review['rating'] ?? 0;
-                    var reviewText = review['review'] ?? '';
-                    var date = review['timestamp']?.toDate() ??
-                        DateTime
-                            .now(); // Handle missing field and convert to DateTime
-
-                    return FutureBuilder<DocumentSnapshot>(
-                      future: _fetchCityName(widget.cityId),
-                      builder: (context, citySnapshot) {
-                        String cityName = 'Unknown';
-                        if (citySnapshot.connectionState ==
-                            ConnectionState.done) {
-                          if (citySnapshot.hasData &&
-                              citySnapshot.data != null) {
-                            cityName = citySnapshot.data!['name'] ?? 'Unknown';
-                          }
-                        }
-                        return Card(
-                          margin: EdgeInsets.symmetric(vertical: 10),
-                          child: ListTile(
-                            title: Text('Rating: $rating stars'),
-                            subtitle: Text(reviewText),
-                            trailing: IconButton(
-                              icon: Icon(Icons.delete),
-                              onPressed: () async {
-                                bool confirmed =
-                                    await _showConfirmationDialog(context);
-                                if (confirmed) {
-                                  await _deleteReview(
-                                      reviewId, widget.cityId, userId);
-                                }
-                              },
-                            ),
-                            onTap: () {
-                              _showDetailsDialog(context, cityName, date);
-                            },
-                          ),
-                        );
-                      },
-                    );
-                  },
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
+        ) ??
+        false;
   }
 }

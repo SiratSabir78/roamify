@@ -12,12 +12,17 @@ class PostBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settingsProvider = Provider.of<SettingsModel>(context);
+    final isDarkMode = settingsProvider.darkMode;
+
     return Container(
-      height: MediaQuery.of(context).size.height / 2,
-      padding: EdgeInsets.only(top: 20, left: 20, right: 20),
+      height: MediaQuery.of(context).size.height / 2, // Adjusted height
+      padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
       decoration: BoxDecoration(
-        color: Color(0xFFED2F6),
-        borderRadius: BorderRadius.only(
+        color: isDarkMode
+            ? Colors.grey[900]
+            : const Color(0xFFED2F6), // Adjusted color
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(40),
           topRight: Radius.circular(40),
         ),
@@ -25,7 +30,7 @@ class PostBottomBar extends StatelessWidget {
       child: ListView(
         children: [
           Padding(
-            padding: EdgeInsets.only(),
+            padding: const EdgeInsets.only(bottom: 20), // Added bottom padding
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -50,6 +55,16 @@ class PostBottomBar extends StatelessWidget {
                 SizedBox(height: 15),
                 Container(
                   height: 80,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: isDarkMode ? Colors.grey[800] : Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: isDarkMode ? Colors.black54 : Colors.black26,
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -67,7 +82,7 @@ class PostBottomBar extends StatelessWidget {
                           ],
                         ),
                         child: Text(
-                          "Book Now",
+                          'Some Info', // Placeholder text
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 26,
@@ -76,6 +91,7 @@ class PostBottomBar extends StatelessWidget {
                           ),
                         ),
                       ),
+                      // Add other widgets here if needed
                     ],
                   ),
                 ),

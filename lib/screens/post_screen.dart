@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:roamify/screens/post_bottom_bar.dart';
 import 'package:roamify/screens/review_screens.dart';
 import 'package:provider/provider.dart';
@@ -23,9 +24,20 @@ class PostScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final isFavorite = context.watch<FavoritesProvider>().isFavorite(cityName);
 
+    final settingsProvider = Provider.of<SettingsModel>(context);
+    final isDarkMode = settingsProvider.darkMode; // Determine dark mode
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(cityName),
+        title: Text(
+          cityName,
+          style: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
+        ),
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        iconTheme:
+            IconThemeData(color: isDarkMode ? Colors.white : Colors.black),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -88,6 +100,7 @@ class PostScreen extends StatelessWidget {
           ],
         ),
       ),
+      backgroundColor: isDarkMode ? Colors.black : Colors.white,
     );
   }
 
