@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:roamify/screens/state.dart';
 
 class ReviewPage extends StatefulWidget {
   final String cityId;
@@ -29,7 +31,8 @@ class _ReviewPageState extends State<ReviewPage> {
       if (user == null) return;
 
       String userId = user.uid;
-      String reviewId = FirebaseFirestore.instance.collection('reviews').doc().id;
+      String reviewId =
+          FirebaseFirestore.instance.collection('reviews').doc().id;
       String cityId = widget.cityId;
 
       await FirebaseFirestore.instance.runTransaction((transaction) async {
@@ -83,19 +86,27 @@ class _ReviewPageState extends State<ReviewPage> {
 
   @override
   Widget build(BuildContext context) {
+    final settingsProvider = Provider.of<SettingsModel>(context);
+    final isDarkMode = settingsProvider.darkMode;
+    final fontSize = settingsProvider.fontSize;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Write a Review'),
-        backgroundColor: const Color.fromARGB(255, 242, 219, 248),
+        title: Text('Write a Review', style: TextStyle(fontSize: fontSize)),
+        backgroundColor: isDarkMode ? Colors.grey[850] : Colors.purple[300],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 20),
             Text(
               'Write a review about ${widget.cityName}',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: fontSize,
+                fontWeight: FontWeight.bold,
+                color: isDarkMode ? Colors.white : Colors.black,
+              ),
             ),
             const SizedBox(height: 20),
             Slider(
@@ -107,6 +118,8 @@ class _ReviewPageState extends State<ReviewPage> {
               max: 5,
               divisions: 5,
               label: _rating.toString(),
+              activeColor: isDarkMode ? Colors.purple[300] : Colors.purple[700],
+              inactiveColor: isDarkMode ? Colors.grey[700] : Colors.grey[400],
             ),
             const SizedBox(height: 20),
             Form(
@@ -119,7 +132,12 @@ class _ReviewPageState extends State<ReviewPage> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20.0),
                   ),
+                  filled: true,
+                  fillColor: isDarkMode ? Colors.grey[800] : Colors.white,
                 ),
+                style: TextStyle(
+                    fontSize: fontSize,
+                    color: isDarkMode ? Colors.white : Colors.black),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please write a review';
@@ -136,10 +154,12 @@ class _ReviewPageState extends State<ReviewPage> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20.0),
                 ),
-                backgroundColor: const Color.fromARGB(255, 242, 219, 248),
+                backgroundColor:
+                    isDarkMode ? Colors.purple[300] : Colors.purple[700],
               ),
               onPressed: submitReview,
-              child: const Text('Submit Review'),
+              child:
+                  Text('Submit Review', style: TextStyle(fontSize: fontSize)),
             ),
             const SizedBox(height: 20),
             StreamBuilder<QuerySnapshot>(
@@ -170,16 +190,29 @@ class _ReviewPageState extends State<ReviewPage> {
 
                     return Card(
                       margin: const EdgeInsets.symmetric(vertical: 10),
+                      color: isDarkMode ? Colors.grey[850] : Colors.white,
                       child: ListTile(
-                        title: Text('Rating: $rating stars'),
-                        subtitle: Text(reviewText),
+                        title: Text('Rating: $rating stars',
+                            style: TextStyle(
+                                fontSize: fontSize,
+                                color:
+                                    isDarkMode ? Colors.white : Colors.black)),
+                        subtitle: Text(reviewText,
+                            style: TextStyle(
+                                fontSize: fontSize,
+                                color: isDarkMode
+                                    ? Colors.white70
+                                    : Colors.black87)),
                         trailing: IconButton(
-                          icon: const Icon(Icons.delete),
+                          icon: Icon(Icons.delete,
+                              color:
+                                  isDarkMode ? Colors.redAccent : Colors.red),
                           onPressed: () async {
                             bool confirmed =
                                 await _showConfirmationDialog(context);
                             if (confirmed) {
-                              await _deleteReview(reviewId, widget.cityId, userId);
+                              await _deleteReview(
+                                  reviewId, widget.cityId, userId);
                             }
                           },
                         ),
@@ -253,16 +286,26 @@ class _ReviewPageState extends State<ReviewPage> {
     return await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text("Confirm Delete"),
-            content: const Text("Are you sure you want to delete this review?"),
+            title: Text("Confirm Delete",
+                style: TextStyle(
+                    fontSize: Provider.of<SettingsModel>(context).fontSize)),
+            content: Text("Are you sure you want to delete this review?",
+                style: TextStyle(
+                    fontSize: Provider.of<SettingsModel>(context).fontSize)),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text("Cancel"),
+                child: Text("Cancel",
+                    style: TextStyle(
+                        fontSize:
+                            Provider.of<SettingsModel>(context).fontSize)),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: const Text("Delete"),
+                child: Text("Delete",
+                    style: TextStyle(
+                        fontSize:
+                            Provider.of<SettingsModel>(context).fontSize)),
               ),
             ],
           ),

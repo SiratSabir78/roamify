@@ -10,6 +10,7 @@ import 'package:roamify/screens/search_screen.dart';
 import 'package:roamify/screens/post_screen.dart';
 import 'package:roamify/screens/app_setting_screen.dart';
 import 'package:roamify/screens/signout.dart';
+import 'package:roamify/screens/state.dart';
 import 'package:roamify/screens/travel_info_screen.dart';
 import 'package:roamify/screens/user_review_Screen.dart';
 
@@ -31,11 +32,16 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final settingsProvider = Provider.of<SettingsModel>(context);
+    final isDarkMode = settingsProvider.darkMode;
     return Scaffold(
       appBar: _currentIndex == 2
           ? AppBar(
-              title: Text("Roamify"),
-              backgroundColor: const Color.fromARGB(255, 221, 128, 244),
+              title: Text("Roamify",
+                  style: TextStyle(color: settingsProvider.textColor)),
+              backgroundColor: settingsProvider.darkMode
+                  ? Colors.black
+                  : const Color.fromARGB(255, 221, 128, 244),
             )
           : null,
       drawer: Drawer(
@@ -44,38 +50,44 @@ class _HomePageState extends State<HomePage> {
           children: <Widget>[
             DrawerHeader(
               decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 221, 128, 244),
+                color: settingsProvider.darkMode
+                    ? Colors.black
+                    : const Color.fromARGB(255, 221, 128, 244),
               ),
               child: Text(
                 'Roamify',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: settingsProvider.textColor,
                   fontSize: 24,
                 ),
               ),
             ),
             ListTile(
-              leading: Icon(Icons.home),
-              title: Text('Home'),
+              leading: Icon(Icons.home, color: settingsProvider.iconColor),
+              title: Text('Home',
+                  style: TextStyle(color: settingsProvider.textColor)),
               onTap: () {
                 Navigator.pop(context);
               },
             ),
             ListTile(
-              leading: Icon(Icons.app_settings_alt),
-              title: Text('App Settings'),
+              leading: Icon(Icons.app_settings_alt,
+                  color: settingsProvider.iconColor),
+              title: Text('App Settings',
+                  style: TextStyle(color: settingsProvider.textColor)),
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AppSettingsScreen(),
+                    builder: (context) => SettingsScreen(),
                   ),
                 );
               },
             ),
             ListTile(
-              leading: Icon(Icons.info),
-              title: Text('Travel Info'),
+              leading: Icon(Icons.info, color: settingsProvider.iconColor),
+              title: Text('Travel Info',
+                  style: TextStyle(color: settingsProvider.textColor)),
               onTap: () {
                 Navigator.push(
                   context,
@@ -86,8 +98,9 @@ class _HomePageState extends State<HomePage> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.feedback),
-              title: Text('Reviews'),
+              leading: Icon(Icons.feedback, color: settingsProvider.iconColor),
+              title: Text('Reviews',
+                  style: TextStyle(color: settingsProvider.textColor)),
               onTap: () {
                 Navigator.push(
                   context,
@@ -98,8 +111,9 @@ class _HomePageState extends State<HomePage> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.logout),
-              title: Text('Sign Out'),
+              leading: Icon(Icons.logout, color: settingsProvider.iconColor),
+              title: Text('Sign Out',
+                  style: TextStyle(color: settingsProvider.textColor)),
               onTap: () async {
                 await signOutAndNavigate(context);
               },
@@ -109,14 +123,19 @@ class _HomePageState extends State<HomePage> {
       ),
       body: _screens[_currentIndex],
       bottomNavigationBar: CurvedNavigationBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        color: isDarkMode
+            ? Colors.grey[900]!
+            : Colors.grey[200]!, // Color of the bar itself
         index: _currentIndex,
-        items: const [
-          Icon(Icons.person_outline, size: 30),
-          Icon(Icons.favorite_outline_outlined, size: 30),
-          Icon(Icons.home, size: 30, color: Colors.redAccent),
-          Icon(Icons.menu_book, size: 30),
-          Icon(Icons.list, size: 30),
+        items: [
+          Icon(Icons.person_outline,
+              size: 30, color: settingsProvider.iconColor),
+          Icon(Icons.favorite_outline_outlined,
+              size: 30, color: settingsProvider.iconColor),
+          Icon(Icons.home, size: 30, color: settingsProvider.iconColor),
+          Icon(Icons.menu_book, size: 30, color: settingsProvider.iconColor),
+          Icon(Icons.list, size: 30, color: settingsProvider.iconColor),
         ],
         onTap: (index) {
           setState(() {
@@ -133,6 +152,7 @@ class HomeContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settingsProvider = Provider.of<SettingsModel>(context);
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 30),
@@ -146,7 +166,10 @@ class HomeContent extends StatelessWidget {
                     return Center(child: CircularProgressIndicator());
                   }
                   if (!snapshot.hasData) {
-                    return Center(child: Text("No data available"));
+                    return Center(
+                        child: Text("No data available",
+                            style:
+                                TextStyle(color: settingsProvider.textColor)));
                   }
                   final cities = snapshot.data!.docs;
                   return ListView.builder(
@@ -165,7 +188,7 @@ class HomeContent extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) => PostScreen(
-                                cityId: city.id, // Pass cityId here
+                                cityId: city.id,
                                 cityName: city['name'],
                                 imagePath: city['imagePath'],
                                 description: city['description'],
@@ -186,26 +209,30 @@ class HomeContent extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               ClipRRect(
-                                  borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(20)),
-                                  child: Image.network(
-                                    city['imagePath'],
-                                    height: 200,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Container(
-                                        height: 200,
-                                        width: double.infinity,
-                                        color: Colors.grey,
-                                        child: Icon(Icons.error),
-                                      );
-                                    },
-                                  )),
+                                borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(20)),
+                                child: Image.network(
+                                  city['imagePath'],
+                                  height: 200,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      height: 200,
+                                      width: double.infinity,
+                                      color: Colors.grey,
+                                      child: Icon(Icons.error,
+                                          color: settingsProvider.iconColor),
+                                    );
+                                  },
+                                ),
+                              ),
                               Container(
                                 padding: EdgeInsets.all(15),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: settingsProvider.darkMode
+                                      ? Colors.grey[850]
+                                      : Colors.white,
                                   borderRadius: BorderRadius.vertical(
                                       bottom: Radius.circular(20)),
                                 ),
@@ -215,13 +242,17 @@ class HomeContent extends StatelessWidget {
                                     Text(
                                       city['name'],
                                       style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold),
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: settingsProvider.textColor,
+                                      ),
                                     ),
                                     SizedBox(height: 5),
                                     Text(
                                       city['description'],
-                                      style: TextStyle(color: Colors.grey[700]),
+                                      style: TextStyle(
+                                          color: settingsProvider.textColor
+                                              .withOpacity(0.7)),
                                     ),
                                     SizedBox(height: 10),
                                     Row(
@@ -233,7 +264,10 @@ class HomeContent extends StatelessWidget {
                                             Icon(Icons.star,
                                                 color: Colors.orange, size: 20),
                                             SizedBox(width: 5),
-                                            Text(city['rating'].toString()),
+                                            Text(city['rating'].toString(),
+                                                style: TextStyle(
+                                                    color: settingsProvider
+                                                        .textColor)),
                                           ],
                                         ),
                                         Row(
@@ -243,7 +277,8 @@ class HomeContent extends StatelessWidget {
                                                   isFavorite
                                                       ? Icons.bookmark
                                                       : Icons.bookmark_border,
-                                                  color: Colors.grey[700]),
+                                                  color: settingsProvider
+                                                      .textColor),
                                               onPressed: () {
                                                 if (isFavorite) {
                                                   context
@@ -262,12 +297,19 @@ class HomeContent extends StatelessWidget {
                                                     context, city.id);
                                               },
                                               style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    settingsProvider.darkMode
+                                                        ? Colors.grey[800]
+                                                        : Colors.purple,
                                                 shape: RoundedRectangleBorder(
                                                   borderRadius:
                                                       BorderRadius.circular(10),
                                                 ),
                                               ),
-                                              child: Text('Book Now'),
+                                              child: Text('Book Now',
+                                                  style: TextStyle(
+                                                      color: settingsProvider
+                                                          .textColor)),
                                             ),
                                           ],
                                         ),
