@@ -9,10 +9,12 @@ class PostBottomBar extends StatelessWidget {
     final isDarkMode = settingsProvider.darkMode;
 
     return Container(
-      height: MediaQuery.of(context).size.height / 2,
+      height: MediaQuery.of(context).size.height / 2, // Adjusted height
       padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.grey[900] : const Color(0xFFED2F6),
+        color: isDarkMode
+            ? Colors.grey[900]
+            : const Color(0xFFED2F6), // Adjusted color
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(40),
           topRight: Radius.circular(40),
@@ -21,38 +23,17 @@ class PostBottomBar extends StatelessWidget {
       child: ListView(
         children: [
           Padding(
-            padding: const EdgeInsets.only(),
+            padding: const EdgeInsets.only(bottom: 20), // Added bottom padding
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "City Name, Country",
-                      style: TextStyle(
-                        fontSize: 23,
-                        fontWeight: FontWeight.w600,
-                        color: isDarkMode ? Colors.white : Colors.black,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.star,
-                          color: Colors.amber,
-                          size: 25,
-                        ),
-                        Text(
-                          "4.5",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: isDarkMode ? Colors.white : Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                Text(
+                  "City Name, Country",
+                  style: TextStyle(
+                    fontSize: 23,
+                    fontWeight: FontWeight.w600,
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  ),
                 ),
                 const SizedBox(height: 25),
                 Text(
@@ -64,107 +45,32 @@ class PostBottomBar extends StatelessWidget {
                   textAlign: TextAlign.justify,
                 ),
                 const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 5),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
-                        child: Image.asset(
-                          "images/city5.jpeg",
-                          fit: BoxFit.cover,
-                          width: 120,
-                          height: 90,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 5),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
-                        child: Image.asset(
-                          "images/city4.jpeg",
-                          fit: BoxFit.cover,
-                          width: 120,
-                          height: 90,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        alignment: Alignment.center,
-                        width: 120,
-                        height: 90,
-                        margin: const EdgeInsets.only(right: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(15),
-                          image: const DecorationImage(
-                            image: AssetImage("images/city6.jpeg"),
-                            fit: BoxFit.cover,
-                            opacity: 0.4,
-                          ),
-                        ),
-                        child: const Text(
-                          "10+",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 15),
                 Container(
                   height: 80,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: isDarkMode ? Colors.grey[800] : Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: isDarkMode ? Colors.black54 : Colors.black26,
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: isDarkMode ? Colors.grey[800] : Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              color:
-                                  isDarkMode ? Colors.black54 : Colors.black26,
-                              blurRadius: 4,
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.bookmark_outline,
-                          size: 40,
-                          color: isDarkMode ? Colors.white : Colors.black,
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 15, horizontal: 25),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Colors.redAccent,
-                          boxShadow: [
-                            BoxShadow(
-                              color:
-                                  isDarkMode ? Colors.black54 : Colors.black26,
-                              blurRadius: 4,
-                            ),
-                          ],
-                        ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
                         child: Text(
-                          "Book Now",
+                          'Some Info', // Placeholder text
                           style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 26,
-                            fontWeight: FontWeight.w500,
+                            color: isDarkMode ? Colors.white : Colors.black,
+                            fontSize: 16,
                           ),
                         ),
                       ),
+                      // Add other widgets here if needed
                     ],
                   ),
                 ),

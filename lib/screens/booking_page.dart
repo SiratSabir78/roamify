@@ -13,11 +13,10 @@ class BookingPage extends StatelessWidget {
     if (user == null) {
       return Scaffold(
         appBar: AppBar(
-          title: Text("My Bookings"),
-          backgroundColor: settingsProvider.darkMode
-              ? Colors.purple[700]
-              : Colors.purple[300],
-        ),
+            title: Text("My Bookings"),
+            backgroundColor: settingsProvider.darkMode
+                ? const Color.fromARGB(255, 221, 128, 244)
+                : const Color.fromARGB(255, 221, 128, 244)),
         body: Center(child: Text("No user signed in")),
       );
     }

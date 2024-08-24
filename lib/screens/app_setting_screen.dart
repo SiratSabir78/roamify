@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:roamify/screens/profile_screen.dart';
 import 'package:roamify/screens/state.dart';
-import 'package:roamify/screens/user_setting_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   @override

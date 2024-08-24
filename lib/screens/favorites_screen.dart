@@ -21,6 +21,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Favorite Cities'),
+        backgroundColor: const Color.fromARGB(255, 221, 128, 244),
       ),
       body: FutureBuilder<List<String>>(
         future: _favoriteCitiesFuture,
@@ -44,7 +45,6 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                 title: Text(cityName),
                 leading: Icon(Icons.star, color: Colors.amber),
                 trailing: ElevatedButton(
-                
                   onPressed: () async {
                     await _removeFromFavorites(context, cityName);
                     setState(() {

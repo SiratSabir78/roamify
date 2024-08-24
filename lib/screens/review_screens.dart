@@ -118,7 +118,7 @@ class _ReviewPageState extends State<ReviewPage> {
               max: 5,
               divisions: 5,
               label: _rating.toString(),
-              activeColor: isDarkMode ? Colors.purple[300] : Colors.purple[700],
+              activeColor: isDarkMode ? const Color.fromARGB(255, 221, 128, 244) : const Color.fromARGB(255, 221, 128, 244),
               inactiveColor: isDarkMode ? Colors.grey[700] : Colors.grey[400],
             ),
             const SizedBox(height: 20),
@@ -155,7 +155,7 @@ class _ReviewPageState extends State<ReviewPage> {
                   borderRadius: BorderRadius.circular(20.0),
                 ),
                 backgroundColor:
-                    isDarkMode ? Colors.purple[300] : Colors.purple[700],
+                    isDarkMode ? const Color.fromARGB(255, 221, 128, 244) : Color.fromRGBO(255, 221, 128, 244),
               ),
               onPressed: submitReview,
               child:

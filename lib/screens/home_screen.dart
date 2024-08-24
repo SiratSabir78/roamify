@@ -147,19 +147,54 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class HomeContent extends StatelessWidget {
+class HomeContent extends StatefulWidget {
+  @override
+  _HomeContentState createState() => _HomeContentState();
+}
+
+class _HomeContentState extends State<HomeContent> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  String searchQuery = "";
 
   @override
   Widget build(BuildContext context) {
     final settingsProvider = Provider.of<SettingsModel>(context);
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 30),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              StreamBuilder<QuerySnapshot>(
+        child: Column(
+          children: [
+            // Search bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: TextField(
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value.toLowerCase();
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: 'Search for a city...',
+                  prefixIcon:
+                      Icon(Icons.search, color: settingsProvider.iconColor),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                        color: settingsProvider.darkMode
+                            ? Colors.grey[800]!
+                            : Colors.grey[300]!),
+                  ),
+                  filled: true,
+                  fillColor: settingsProvider.darkMode
+                      ? Colors.grey[850]
+                      : Colors.white,
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
                 stream: firestore.collection('cities').snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -171,10 +206,12 @@ class HomeContent extends StatelessWidget {
                             style:
                                 TextStyle(color: settingsProvider.textColor)));
                   }
-                  final cities = snapshot.data!.docs;
+                  final cities = snapshot.data!.docs.where((city) {
+                    final cityName = city['name'].toLowerCase();
+                    return cityName.contains(searchQuery);
+                  }).toList();
+
                   return ListView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
                     itemCount: cities.length,
                     itemBuilder: (context, index) {
                       var city = cities[index];
@@ -300,7 +337,8 @@ class HomeContent extends StatelessWidget {
                                                 backgroundColor:
                                                     settingsProvider.darkMode
                                                         ? Colors.grey[800]
-                                                        : Colors.purple,
+                                                        : const Color.fromARGB(
+                                                            255, 221, 128, 244),
                                                 shape: RoundedRectangleBorder(
                                                   borderRadius:
                                                       BorderRadius.circular(10),
@@ -326,8 +364,8 @@ class HomeContent extends StatelessWidget {
                   );
                 },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
