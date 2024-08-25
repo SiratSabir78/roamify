@@ -227,7 +227,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Profile Picture Section
             Center(
               child: Column(
                 children: [
