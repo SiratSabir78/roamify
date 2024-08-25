@@ -99,7 +99,7 @@ class _LoginState extends State<LoginPage> {
                 errorText: _emailError,
               ),
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 15),
             TextField(
               controller: passwordController,
               obscureText: true,

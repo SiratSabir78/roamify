@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:roamify/screens/state.dart'; // Assuming this is your settings provider
+import 'package:roamify/screens/state.dart';
 
 class PostBottomBar extends StatelessWidget {
+  final String cityName;
+
+  final String description;
+
+  PostBottomBar({
+    required this.cityName,
+    required this.description,
+  });
+
   @override
   Widget build(BuildContext context) {
     final settingsProvider = Provider.of<SettingsModel>(context);
@@ -25,26 +34,27 @@ class PostBottomBar extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: 20), // Added bottom padding
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Text(
-                  "City Name, Country",
-                  style: TextStyle(
-                    fontSize: 23,
-                    fontWeight: FontWeight.w600,
-                    color: isDarkMode ? Colors.white : Colors.black,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "$cityName, Pakistan",
+                      style: TextStyle(
+                        fontSize: 23,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 25),
+                SizedBox(height: 25),
                 Text(
-                  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Scelerisque viverra mauris in aliquam sem fringilla ut morbi tincidunt. Laoreet non curabitur gravida arcu ac tortor dignissim convallis aenean. Gravida neque convallis a cras semper auctor neque vitae. Eget lorem dolor sed viverra ipsum nunc aliquet bibendum.",
-                  style: TextStyle(
-                    color: isDarkMode ? Colors.white70 : Colors.black54,
-                    fontSize: 16,
-                  ),
+                  description,
+                  style: TextStyle(color: Colors.black54, fontSize: 16),
                   textAlign: TextAlign.justify,
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 15),
                 Container(
                   height: 80,
                   decoration: BoxDecoration(
@@ -60,13 +70,26 @@ class PostBottomBar extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
+                      Container(
+                        padding:
+                            EdgeInsets.symmetric(vertical: 15, horizontal: 25),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.redAccent,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 4,
+                            ),
+                          ],
+                        ),
                         child: Text(
                           'Some Info', // Placeholder text
                           style: TextStyle(
-                            color: isDarkMode ? Colors.white : Colors.black,
-                            fontSize: 16,
+                            color: Colors.white,
+                            fontSize: 26,
+                            fontWeight: FontWeight.w500,
+                            
                           ),
                         ),
                       ),

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:roamify/screens/home_screen.dart';
+import 'package:roamify/screens/welcome_screen.dart';
 import 'package:roamify/screens/state.dart';
 
 class FavoriteScreen extends StatefulWidget {
@@ -99,7 +100,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                   child: Text('Remove'),
                 ),
                 onTap: () {
-                  HomePage();
+                  WelcomeScreen();
                 },
               );
             },

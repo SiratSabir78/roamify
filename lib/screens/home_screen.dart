@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:provider/provider.dart';
@@ -154,6 +155,13 @@ class _HomeContentState extends State<HomeContent> {
   String searchQuery = "";
 
   @override
+  void initState() {
+    super.initState();
+    // Load the user's favorite cities when the screen initializes
+    context.read<FavoritesProvider>().loadFavorites();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final settingsProvider = Provider.of<SettingsModel>(context);
 
@@ -214,7 +222,7 @@ class _HomeContentState extends State<HomeContent> {
                       var city = cities[index];
                       final isFavorite = context
                           .watch<FavoritesProvider>()
-                          .isFavorite(city.id);
+                          .isFavorite(city['name']);
 
                       return GestureDetector(
                         onTap: () {
@@ -290,8 +298,7 @@ class _HomeContentState extends State<HomeContent> {
                                     ),
                                     SizedBox(height: 10),
                                     Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
                                         Row(
                                           children: [
@@ -308,27 +315,23 @@ class _HomeContentState extends State<HomeContent> {
                                           children: [
                                             IconButton(
                                               icon: Icon(
-                                                  isFavorite
-                                                      ? Icons.bookmark
-                                                      : Icons.bookmark_border,
-                                                  color: settingsProvider
-                                                      .textColor),
+                                                isFavorite
+                                                    ? Icons.favorite
+                                                    : Icons.favorite_border,
+                                                color: isFavorite
+                                                    ? Colors.red
+                                                    : settingsProvider
+                                                        .textColor,
+                                              ),
                                               onPressed: () {
-                                                if (isFavorite) {
-                                                  context
-                                                      .read<FavoritesProvider>()
-                                                      .removeFavorite(city.id);
-                                                } else {
-                                                  context
-                                                      .read<FavoritesProvider>()
-                                                      .addFavorite(city.id);
-                                                }
+                                                _toggleFavorite(
+                                                    context, city['name']);
                                               },
                                             ),
                                             ElevatedButton(
                                               onPressed: () {
                                                 _showBookingDialog(
-                                                    context, city.id);
+                                                    context, city['name']);
                                               },
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor:
@@ -368,6 +371,57 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
+  Future<void> _toggleFavorite(BuildContext context, String cityName) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('You need to be logged in to add favorites'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    final userDoc =
+        FirebaseFirestore.instance.collection('users').doc(user.uid);
+    final isFavorite = context.read<FavoritesProvider>().isFavorite(cityName);
+
+    try {
+      if (isFavorite) {
+        await userDoc.update({
+          'favoriteCities': FieldValue.arrayRemove([cityName])
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Removed from your favorites'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else {
+        await userDoc.update({
+          'favoriteCities': FieldValue.arrayUnion([cityName])
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Added to your favorites'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+
+      // Update the local favorites state
+      context.read<FavoritesProvider>().toggleFavorite(cityName);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error updating favorites'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
   void _showBookingDialog(BuildContext context, String cityId) {
     showDialog(
       context: context,
@@ -377,3 +431,64 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 }
+
+  Future<void> _toggleFavorite(BuildContext context, String cityName) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('You need to be logged in to add favorites'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    final userDoc =
+        FirebaseFirestore.instance.collection('users').doc(user.uid);
+    final isFavorite = context.read<FavoritesProvider>().isFavorite(cityName);
+
+    try {
+      if (isFavorite) {
+        await userDoc.update({
+          'favoriteCities': FieldValue.arrayRemove([cityName])
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Removed from your favorites'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else {
+        await userDoc.update({
+          'favoriteCities': FieldValue.arrayUnion([cityName])
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Added to your favorites'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+
+      // Update the local favorites state
+      context.read<FavoritesProvider>().toggleFavorite(cityName);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error updating favorites'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  void _showBookingDialog(BuildContext context, String cityId) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return BookingFormDialog(cityId: cityId);
+      },
+    );
+  }
+
