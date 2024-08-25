@@ -7,6 +7,7 @@ import 'package:roamify/screens/home_screen.dart';
 import 'package:roamify/screens/state.dart';
 
 class BookingPage extends StatelessWidget {
+  
   @override
   Widget build(BuildContext context) {
     final settingsProvider = Provider.of<SettingsModel>(context);

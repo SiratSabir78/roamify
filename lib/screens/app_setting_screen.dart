@@ -12,7 +12,7 @@ class SettingsScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           'Settings',
-         
+        
         ),
         backgroundColor: settings.darkMode
             ? Colors.black
@@ -109,8 +109,8 @@ class SettingsScreen extends StatelessWidget {
                   "5. Termination\n\n"
                   "We may terminate your access to the app if you breach any of these terms.\n\n"
                   "6. Contact Us\n\n"
-                  "If you have any questions or concerns about these terms, please contact us at support@example.com.",
-                  style: TextStyle(fontSize: fontSize),
+                  "If you have any questions or concerns about these terms, please contact us at roamify@gmail.com.",
+                  style: TextStyle(fontSize: 16),
                 ),
               ],
             ),
@@ -139,19 +139,21 @@ class SettingsScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "1. Information We Collect\n\n"
-                  "We collect information such as your name, email address, and other personal details when you register.\n\n"
-                  "2. How We Use Your Information\n\n"
-                  "We use the information we collect to provide you with a personalized experience and to improve our app.\n\n"
-                  "3. Sharing Your Information\n\n"
-                  "We do not share your personal information with third parties except as required by law.\n\n"
-                  "4. Data Security\n\n"
-                  "We implement industry-standard security measures to protect your data.\n\n"
-                  "5. Changes to Privacy Policy\n\n"
-                  "We may update our privacy policy from time to time. Changes will be posted on this page.\n\n"
-                  "6. Contact Us\n\n"
-                  "If you have any questions or concerns about this privacy policy, please contact us at support@example.com.",
-                  style: TextStyle(fontSize: fontSize),
+                  "1. Information Collection\n\n"
+                  "We collect personal information that you provide to us directly, such as your name, email address, and other contact details.\n\n"
+                  "2. Use of Information\n\n"
+                  "We use your information to provide, maintain, and improve our services, as well as to communicate with you about updates and offers.\n\n"
+                  "3. Data Security\n\n"
+                  "We implement reasonable security measures to protect your information from unauthorized access, alteration, or destruction.\n\n"
+                  "4. Sharing Information\n\n"
+                  "We do not sell or rent your personal information to third parties. We may share your information with partners and service providers only as necessary to fulfill our services.\n\n"
+                  "5. User Rights\n\n"
+                  "You have the right to access, correct, or delete your personal information. To exercise these rights, please contact us directly.\n\n"
+                  "6. Changes to Privacy Policy\n\n"
+                  "We may update this Privacy Policy from time to time. Any changes will be posted on this page.\n\n"
+                  "7. Contact Us\n\n"
+                  "If you have any questions or concerns about our Privacy Policy, please contact us at roamify@gmail.com.",
+                  style: TextStyle(fontSize: 16),
                 ),
               ],
             ),
