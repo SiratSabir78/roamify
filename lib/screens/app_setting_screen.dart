@@ -140,7 +140,7 @@ class SettingsScreen extends StatelessWidget {
                   "5. Termination\n\n"
                   "We may terminate your access to the app if you breach any of these terms.\n\n"
                   "6. Contact Us\n\n"
-                  "If you have any questions or concerns about these terms, please contact us at support@example.com.",
+                  "If you have any questions or concerns about these terms, please contact us at roamify@gmail.com.",
                   style: TextStyle(fontSize: 16),
                 ),
               ],
@@ -184,7 +184,7 @@ class SettingsScreen extends StatelessWidget {
                   "6. Changes to Privacy Policy\n\n"
                   "We may update this Privacy Policy from time to time. Any changes will be posted on this page.\n\n"
                   "7. Contact Us\n\n"
-                  "If you have any questions or concerns about our Privacy Policy, please contact us at support@example.com.",
+                  "If you have any questions or concerns about our Privacy Policy, please contact us at roamify@gmail.com.",
                   style: TextStyle(fontSize: 16),
                 ),
               ],

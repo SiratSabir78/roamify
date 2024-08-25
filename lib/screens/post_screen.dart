@@ -96,7 +96,7 @@ class PostScreen extends StatelessWidget {
             const SizedBox(height: 20),
             PostBottomBar(
               cityName: cityName,
-              description: description,
+              description: description, cityId: cityId,
             ),
           ],
         ),
