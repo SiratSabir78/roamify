@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import 'package:roamify/screens/state.dart';
 
-class ReviewScreen extends StatelessWidget {
+class ReviewScreen extends StatefulWidget {
+  @override
+  _ReviewScreenState createState() => _ReviewScreenState();
+}
+
+class _ReviewScreenState extends State<ReviewScreen> {
+  double _fontSize = 16.0;
+  bool _isDarkMode = false;
+
   @override
   Widget build(BuildContext context) {
+    final settings = Provider.of<SettingsModel>(context);
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
@@ -12,6 +23,7 @@ class ReviewScreen extends StatelessWidget {
       return Scaffold(
         appBar: AppBar(
           title: Text('User Reviews'),
+          actions: _buildThemeActions(),
         ),
         body: Center(
           child: Text('You need to be logged in to view your reviews'),
@@ -24,6 +36,10 @@ class ReviewScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('My Reviews'),
+        backgroundColor: settings.darkMode
+            ? Colors.black
+            : const Color.fromARGB(255, 221, 128, 244),
+        actions: _buildThemeActions(),
       ),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance
@@ -62,10 +78,14 @@ class ReviewScreen extends StatelessWidget {
                 child: ListTile(
                   contentPadding: EdgeInsets.all(16.0),
                   leading: Icon(Icons.star, color: Colors.amber),
-                  title:
-                      Text(review.reviewText, style: TextStyle(fontSize: 16.0)),
+                  title: Text(
+                    review.reviewText,
+                    style: TextStyle(fontSize: _fontSize),
+                  ),
                   subtitle: Text(
-                      'Rating: ${review.rating}\nDate: ${review.date.toLocal()}'),
+                    'Rating: ${review.rating}\nDate: ${review.date.toLocal()}',
+                    style: TextStyle(fontSize: _fontSize * 0.8),
+                  ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -96,6 +116,62 @@ class ReviewScreen extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+
+  List<Widget> _buildThemeActions() {
+    return [
+      IconButton(
+        icon: Icon(_isDarkMode ? Icons.dark_mode : Icons.light_mode),
+        onPressed: () {
+          setState(() {
+            _isDarkMode = !_isDarkMode;
+          });
+        },
+      ),
+      IconButton(
+        icon: Icon(Icons.text_fields),
+        onPressed: () async {
+          await _showFontSizeDialog();
+        },
+      ),
+    ];
+  }
+
+  Future<void> _showFontSizeDialog() async {
+    return showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Adjust Font Size'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Font Size: ${_fontSize.toStringAsFixed(1)}'),
+              Slider(
+                value: _fontSize,
+                min: 10.0,
+                max: 30.0,
+                divisions: 20,
+                label: _fontSize.toStringAsFixed(1),
+                onChanged: (value) {
+                  setState(() {
+                    _fontSize = value;
+                  });
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Close'),
+            ),
+          ],
+        );
+      },
     );
   }
 

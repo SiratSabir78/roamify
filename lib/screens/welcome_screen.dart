@@ -1,23 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:roamify/screens/home_screen.dart';
 
-
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    // Get the screen size
+    final size = MediaQuery.of(context).size;
+
+    return Scaffold(
+      body: Container(
+        width: size.width,
+        height: size.height,
         decoration: BoxDecoration(
-            image: DecorationImage(
-                image: AssetImage("images/bgwelcomeScreen.jpeg"),
-                fit: BoxFit.cover,
-                opacity: 0.8)),
+          image: DecorationImage(
+            image: AssetImage("images/bgwelcomeScreen.jpeg"),
+            fit: BoxFit.cover, // Ensures the image covers the entire container
+          ),
+        ),
         child: Material(
           color: Colors.transparent,
           child: SafeArea(
             child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 65, horizontal: 25),
+              padding: EdgeInsets.symmetric(
+                vertical: size.height *
+                    0.1, // Adjust vertical padding based on screen height
+                horizontal: size.width *
+                    0.05, // Adjust horizontal padding based on screen width
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -50,24 +61,29 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 30),
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
+                  Align(
+                    alignment: Alignment
+                        .bottomRight, // Align the button to the bottom right
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => HomePage(),
-                          ));
-                    },
-                    child: Ink(
-                      padding: EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        Icons.arrow_forward_ios,
-                        color: Colors.black,
-                        size: 20,
+                          ),
+                        );
+                      },
+                      child: Ink(
+                        padding: EdgeInsets.all(15),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.arrow_forward_ios,
+                          color: Colors.black,
+                          size: 20,
+                        ),
                       ),
                     ),
                   ),
@@ -76,6 +92,8 @@ class WelcomeScreen extends StatelessWidget {
               ),
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

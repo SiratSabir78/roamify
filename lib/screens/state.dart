@@ -19,13 +19,6 @@ class SettingsModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Language setting
-  String _language = 'English';
-  String get language => _language;
-  void setLanguage(String value) {
-    _language = value;
-    notifyListeners();
-  }
 
   // Notifications setting
   bool _notificationsEnabled = true;

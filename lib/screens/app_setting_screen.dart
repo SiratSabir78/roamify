@@ -9,24 +9,31 @@ class SettingsScreen extends StatelessWidget {
     final settings = Provider.of<SettingsModel>(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Settings')),
+      appBar: AppBar(
+        title: Text(
+          'Settings',
+         
+        ),
+        backgroundColor: settings.darkMode
+            ? Colors.black
+            : const Color.fromARGB(255, 221, 128, 244),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Dark Mode Toggle
             SwitchListTile(
-              title: Text('Dark Mode'),
+              title: Text('Dark Mode',
+                  style: TextStyle(fontSize: settings.fontSize)),
               value: settings.darkMode,
               onChanged: (value) {
                 settings.toggleDarkMode(value);
               },
             ),
-
-            // Font Size Slider
             ListTile(
-              title: Text('Font Size'),
+              title: Text('Font Size',
+                  style: TextStyle(fontSize: settings.fontSize)),
               subtitle: Slider(
                 value: settings.fontSize,
                 min: 10.0,
@@ -36,37 +43,33 @@ class SettingsScreen extends StatelessWidget {
                 },
               ),
             ),
-
-            // Notifications Toggle
             SwitchListTile(
-              title: Text('Enable Notifications'),
+              title: Text('Enable Notifications',
+                  style: TextStyle(fontSize: settings.fontSize)),
               value: settings.notificationsEnabled,
               onChanged: (value) {
                 settings.toggleNotifications(value);
               },
             ),
-
-            // Privacy Policy
             ListTile(
-              title: Text('Privacy Policy'),
+              title: Text('Privacy Policy',
+                  style: TextStyle(fontSize: settings.fontSize)),
               trailing: Icon(Icons.arrow_forward),
               onTap: () {
-                _showPrivacyPolicyDialog(context);
+                _showPrivacyPolicyDialog(context, settings.fontSize);
               },
             ),
-
-            // Terms of Service
             ListTile(
-              title: Text('Terms of Service'),
+              title: Text('Terms of Service',
+                  style: TextStyle(fontSize: settings.fontSize)),
               trailing: Icon(Icons.arrow_forward),
               onTap: () {
-                _showTermsAndServicesDialog(context);
+                _showTermsAndServicesDialog(context, settings.fontSize);
               },
             ),
-
-            // Account Management
             ListTile(
-              title: Text('Account Management'),
+              title: Text('Account Management',
+                  style: TextStyle(fontSize: settings.fontSize)),
               trailing: Icon(Icons.arrow_forward),
               onTap: () {
                 Navigator.push(
@@ -80,50 +83,16 @@ class SettingsScreen extends StatelessWidget {
           ],
         ),
       ),
+      backgroundColor: settings.darkMode ? Colors.black : Colors.white,
     );
   }
 
-  // Helper method to show language selection dialog
-  void _showLanguageDialog(BuildContext context) {
+  void _showTermsAndServicesDialog(BuildContext context, double fontSize) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Select Language'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: Text('English'),
-                onTap: () {
-                  Provider.of<SettingsModel>(context, listen: false)
-                      .setLanguage('English');
-                  Navigator.of(context).pop();
-                },
-              ),
-              ListTile(
-                title: Text('Spanish'),
-                onTap: () {
-                  Provider.of<SettingsModel>(context, listen: false)
-                      .setLanguage('Spanish');
-                  Navigator.of(context).pop();
-                },
-              ),
-              // Add more languages as needed
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  // Helper method to show Terms of Service dialog
-  void _showTermsAndServicesDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Terms of Service'),
+          title: Text('Terms of Service', style: TextStyle(fontSize: fontSize)),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,7 +120,7 @@ class SettingsScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Close'),
+              child: Text('Close', style: TextStyle(fontSize: fontSize)),
             ),
           ],
         );
@@ -159,13 +128,12 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // Helper method to show Privacy Policy dialog
-  void _showPrivacyPolicyDialog(BuildContext context) {
+  void _showPrivacyPolicyDialog(BuildContext context, double fontSize) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Privacy Policy'),
+          title: Text('Privacy Policy', style: TextStyle(fontSize: fontSize)),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,7 +163,7 @@ class SettingsScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Close'),
+              child: Text('Close', style: TextStyle(fontSize: fontSize)),
             ),
           ],
         );

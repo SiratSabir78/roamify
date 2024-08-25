@@ -1,6 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:provider/provider.dart'; // Import provider package
+import 'package:roamify/screens/state.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -12,6 +17,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _username = '';
   String _gender = 'Male'; // Default to male, change as necessary
   String _profileImagePath = 'images/male_default.png'; // Default profile image
+
+  final picker = ImagePicker();
 
   @override
   void initState() {
@@ -28,27 +35,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
             .get();
 
         if (userDoc.exists) {
-          Map<String, dynamic>? data = userDoc.data() as Map<String, dynamic>?;
+          setState(() {
+            _username = userDoc['username'] ?? '';
+            _gender =
+                userDoc['gender'] ?? 'Male'; // Default to male if not specified
 
-          if (data != null) {
-            setState(() {
-              _username = data['username'] ?? '';
-              _gender =
-                  data['gender'] ?? 'Male'; // Default to male if not specified
-
-              // Check if the profileImagePath field exists before accessing it
-              if (data.containsKey('profileImagePath')) {
-                _profileImagePath = data['profileImagePath'];
-              } else {
-                // Set the profile image based on gender if profileImagePath doesn't exist
-                _profileImagePath = _gender == 'Female'
+            // Set the profile image based on gender
+            _profileImagePath = userDoc['profileImagePath'] ??
+                (_gender == 'Female'
                     ? 'images/female_default.png'
-                    : 'images/male_default.png';
-              }
-            });
-          } else {
-            print('User document data is null');
-          }
+                    : 'images/male_default.png');
+          });
         } else {
           print('User document does not exist');
         }
@@ -63,7 +60,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _pickAndUploadImage() async {
+    try {
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
+      if (pickedFile != null) {
+        File imageFile = File(pickedFile.path);
+        String fileName = '${_user!.uid}.png';
+        print('Uploading image: ${imageFile.path}');
+
+        // Upload the image to Firebase Storage
+        UploadTask uploadTask =
+            FirebaseStorage.instance.ref().child(fileName).putFile(imageFile);
+
+        // Wait for the upload to complete
+        TaskSnapshot snapshot = await uploadTask;
+        print('Upload complete. Getting download URL...');
+
+        String downloadUrl = await snapshot.ref.getDownloadURL();
+        print('Download URL: $downloadUrl');
+
+        // Update the user's profile image URL in Firestore
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(_user!.uid)
+            .update({'profileImagePath': downloadUrl});
+
+        setState(() {
+          _profileImagePath = downloadUrl;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Profile picture updated successfully!'),
+        ));
+      } else {
+        print('No image selected.');
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('No image selected.'),
+        ));
+      }
+    } catch (e) {
+      print('Error uploading image: $e');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Error uploading image: $e'),
+      ));
+    }
+  }
 
   void _showChangeUsernameDialog() {
     TextEditingController usernameController = TextEditingController();
@@ -248,65 +290,85 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   @override
-Widget build(BuildContext context) {
-  Color primaryColor = Theme.of(context).primaryColor;
-  Color textColor = Theme.of(context).textTheme.bodyText1?.color ?? Colors.black87;
+  Widget build(BuildContext context) {
+    // Access settings from the SettingsModel
+    final settings = Provider.of<SettingsModel>(context);
+    Color primaryColor = Theme.of(context).primaryColor;
+    Color textColor = settings.textColor;
+    Color iconColor = settings.iconColor;
 
-  return Scaffold(
-    appBar: AppBar(
-      title: Text('Profile Settings'),
-      backgroundColor: primaryColor,
-      centerTitle: true,
-    ),
-    body: Padding(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          // Profile Picture Section
-          Center(
-            child: Column(
-              children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundImage: AssetImage(_profileImagePath),
-                ),
-                SizedBox(height: 8),
-                // Removed the button to change the profile picture
-              ],
-            ),
-          ),
-          SizedBox(height: 20),
-
-          // Username Tile
-          if (_user != null)
-            ListTile(
-              title: Row(
-                children: [
-                  Text('Username: ', style: TextStyle(color: textColor)),
-                  Text(_username, style: TextStyle(color: primaryColor)),
-                ],
-              ),
-              trailing: Icon(Icons.edit, color: primaryColor),
-              onTap: _showChangeUsernameDialog,
-            ),
-          Divider(color: Colors.grey),
-
-          // Password Tile
-          if (_user != null)
-            ListTile(
-              title: Row(
-                children: [
-                  Text('Password: ', style: TextStyle(color: textColor)),
-                  Text('********', style: TextStyle(color: primaryColor)),
-                ],
-              ),
-              trailing: Icon(Icons.edit, color: primaryColor),
-              onTap: _showChangePasswordDialog,
-            ),
-          Divider(color: Colors.grey),
-        ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Profile Settings'),
+        backgroundColor: settings.darkMode
+            ? Colors.black
+            : const Color.fromARGB(255, 221, 128, 244),
       ),
-    ),
-  );
-}
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            // Profile Picture Section
+            Center(
+              child: Column(
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundImage: NetworkImage(_profileImagePath),
+                  ),
+                  SizedBox(height: 8),
+                  //
+                  // Profile Picture Section (cont.)
+                  TextButton(
+                    onPressed: _pickAndUploadImage,
+                    child: Text(
+                      'Change Profile Picture',
+                      style: TextStyle(color: primaryColor),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 20),
+
+            // Username Tile
+            if (_user != null)
+              ListTile(
+                title: Row(
+                  children: [
+                    Text('Username: ',
+                        style: TextStyle(
+                            color: textColor, fontSize: settings.fontSize)),
+                    Text(_username,
+                        style: TextStyle(
+                            color: textColor, fontSize: settings.fontSize)),
+                  ],
+                ),
+                trailing: Icon(Icons.edit, color: iconColor),
+                onTap: _showChangeUsernameDialog,
+              ),
+            Divider(color: Colors.grey),
+
+            // Password Tile
+            if (_user != null)
+              ListTile(
+                title: Row(
+                  children: [
+                    Text('Password: ',
+                        style: TextStyle(
+                            color: textColor, fontSize: settings.fontSize)),
+                    Text('********',
+                        style: TextStyle(
+                            color: textColor, fontSize: settings.fontSize)),
+                  ],
+                ),
+                trailing: Icon(Icons.edit, color: iconColor),
+                onTap: _showChangePasswordDialog,
+              ),
+            Divider(color: Colors.grey),
+          ],
+        ),
+      ),
+    );
+  }
 }

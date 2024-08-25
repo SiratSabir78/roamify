@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:roamify/screens/favorites_screen.dart';
 import 'package:roamify/screens/profile_screen.dart';
 import 'package:roamify/screens/booking_page.dart';
-import 'package:roamify/screens/search_screen.dart';
 
 class HomeBottomBar extends StatefulWidget {
   @override
@@ -17,7 +16,7 @@ class _HomeBottomBarState extends State<HomeBottomBar> {
     ProfileScreen(),
     FavoriteScreen(),
     BookingPage(),
-    SearchScreen(),
+  
   ];
 
   @override
