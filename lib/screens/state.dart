@@ -19,7 +19,6 @@ class SettingsModel extends ChangeNotifier {
     notifyListeners();
   }
 
-
   // Notifications setting
   bool _notificationsEnabled = true;
   bool get notificationsEnabled => _notificationsEnabled;
