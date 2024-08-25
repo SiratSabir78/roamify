@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:roamify/screens/home_screen.dart';
 import 'package:roamify/screens/state.dart';
 
 class BookingPage extends StatelessWidget {
@@ -13,10 +14,18 @@ class BookingPage extends StatelessWidget {
     if (user == null) {
       return Scaffold(
         appBar: AppBar(
-            title: Text("My Bookings"),
-            backgroundColor: settingsProvider.darkMode
-                ? const Color.fromARGB(255, 221, 128, 244)
-                : const Color.fromARGB(255, 221, 128, 244)),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          title: Text("My Bookings",
+              style: TextStyle(color: settingsProvider.textColor)),
+          backgroundColor: settingsProvider.darkMode
+              ? Colors.black
+              : const Color.fromARGB(255, 221, 128, 244),
+        ),
         body: Center(child: Text("No user signed in")),
       );
     }
@@ -24,9 +33,20 @@ class BookingPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HomePage(),
+                ));
+          },
+        ),
         title: Text("My Bookings"),
-        backgroundColor:
-            settingsProvider.darkMode ? const Color.fromARGB(255, 221, 128, 244) : Colors.purple[300],
+        backgroundColor: settingsProvider.darkMode
+            ? Colors.black
+            : const Color.fromARGB(255, 221, 128, 244),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -333,7 +353,7 @@ class _BookingFormDialogState extends State<BookingFormDialog> {
               SizedBox(height: 10),
               TextFormField(
                 decoration: InputDecoration(
-                  labelText: 'Number of Users',
+                  labelText: 'Number of People',
                   suffixIcon: Icon(Icons.person),
                 ),
                 initialValue: '1',

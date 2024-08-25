@@ -2,6 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
+import 'package:roamify/screens/home_screen.dart';
+import 'package:roamify/screens/state.dart'; // Add this import for using Provider
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -24,7 +27,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       try {
         DocumentSnapshot userDoc = await FirebaseFirestore.instance
             .collection('users')
-            .doc(_user!.uid)
+            .doc(_user.uid)
             .get();
 
         if (userDoc.exists) {
@@ -206,8 +209,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       AuthCredential credential = EmailAuthProvider.credential(
                           email: _user!.email!,
                           password: currentPasswordController.text);
-                      await _user!.reauthenticateWithCredential(credential);
-                      await _user!.updatePassword(newPasswordController.text);
+                      await _user.reauthenticateWithCredential(credential);
+                      await _user.updatePassword(newPasswordController.text);
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           content: Text('Password changed successfully!')));
@@ -293,7 +296,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           await _user!.verifyBeforeUpdateEmail(newEmail);
                           await FirebaseFirestore.instance
                               .collection('users')
-                              .doc(_user!.uid)
+                              .doc(_user.uid)
                               .update({'email': newEmail});
                           onEmailChanged(); // Call the callback to update the profile page
                           Navigator.pop(context);
@@ -319,15 +322,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Obtain settings from the SettingsModel
+    final settings = Provider.of<SettingsModel>(context);
     Color primaryColor = Theme.of(context).primaryColor;
-    Color textColor = Colors.black87;
+    Color textColor = settings.darkMode ? Colors.white70 : Colors.black87;
+    Color backgroundColor = settings.darkMode ? Colors.black : Colors.white;
+    double fontSize = settings.fontSize;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile Settings'),
-        backgroundColor: primaryColor,
-        centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HomePage(),
+                ));
+          },
+        ),
+        title: Text(
+          'Profile Settings',
+        ),
+        backgroundColor: settings.darkMode
+            ? Colors.black
+            : const Color.fromARGB(255, 221, 128, 244),
       ),
+      backgroundColor: backgroundColor,
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
@@ -347,8 +368,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     },
                     child: Text(
                       'Change Profile Picture',
-                      style:
-                          TextStyle(color: Color.fromARGB(255, 221, 128, 244)),
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 221, 128, 244),
+                        fontSize: fontSize,
+                      ),
                     ),
                   ),
                 ],
@@ -361,8 +384,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ListTile(
                 title: Row(
                   children: [
-                    Text('Username: ', style: TextStyle(color: textColor)),
-                    Text(_username, style: TextStyle(color: primaryColor)),
+                    Text('Username: ',
+                        style: TextStyle(color: textColor, fontSize: fontSize)),
+                    Text(_username,
+                        style:
+                            TextStyle(color: primaryColor, fontSize: fontSize)),
                   ],
                 ),
                 trailing: Icon(Icons.edit, color: primaryColor),
@@ -374,8 +400,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ListTile(
                 title: Row(
                   children: [
-                    Text('Password: ', style: TextStyle(color: textColor)),
-                    Text('********', style: TextStyle(color: primaryColor)),
+                    Text('Password: ',
+                        style: TextStyle(color: textColor, fontSize: fontSize)),
+                    Text('********',
+                        style:
+                            TextStyle(color: primaryColor, fontSize: fontSize)),
                   ],
                 ),
                 trailing: Icon(Icons.edit, color: primaryColor),
@@ -387,8 +416,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ListTile(
                 title: Row(
                   children: [
-                    Text('Email: ', style: TextStyle(color: textColor)),
-                    Text(_email, style: TextStyle(color: primaryColor)),
+                    Text('Email: ',
+                        style: TextStyle(color: textColor, fontSize: fontSize)),
+                    Text(_email,
+                        style:
+                            TextStyle(color: primaryColor, fontSize: fontSize)),
                   ],
                 ),
                 trailing: Icon(Icons.edit, color: primaryColor),
