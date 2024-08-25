@@ -21,7 +21,7 @@ class FavoritesProvider with ChangeNotifier {
     await _updateFavoritesInFirestore();
   }
 
-  void toggleFavorite(String cityName) async {
+  Future<void> toggleFavorite(String cityName) async {
     if (isFavorite(cityName)) {
       _favorites.remove(cityName);
     } else {
@@ -58,13 +58,17 @@ class FavoritesProvider with ChangeNotifier {
         _firestore.collection('cities').doc(cityName).collection('bookings');
     final bookingDoc = bookingCollection.doc(user.uid);
 
-    if (isBooking) {
-      await bookingDoc.set({
-        'userId': user.uid,
-        'bookedOn': Timestamp.now(),
-      });
-    } else {
-      await bookingDoc.delete();
+    try {
+      if (isBooking) {
+        await bookingDoc.set({
+          'userId': user.uid,
+          'bookedOn': Timestamp.now(),
+        });
+      } else {
+        await bookingDoc.delete();
+      }
+    } catch (e) {
+      print('Error updating bookings: $e');
     }
   }
 
@@ -86,8 +90,12 @@ class FavoritesProvider with ChangeNotifier {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    await _firestore.collection('users').doc(user.uid).update({
-      'favoriteCities': _favorites.toList(),
-    });
+    try {
+      await _firestore.collection('users').doc(user.uid).update({
+        'favoriteCities': _favorites.toList(),
+      });
+    } catch (e) {
+      print('Error updating favorites: $e');
+    }
   }
 }
