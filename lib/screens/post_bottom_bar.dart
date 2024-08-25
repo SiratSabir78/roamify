@@ -53,7 +53,9 @@ class PostBottomBar extends StatelessWidget {
                 SizedBox(height: 25),
                 Text(
                   description,
-                  style: TextStyle(color: Colors.black54, fontSize: 16),
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  ),
                   textAlign: TextAlign.justify,
                 ),
                 SizedBox(height: 15),
@@ -64,7 +66,9 @@ class PostBottomBar extends StatelessWidget {
                     color: isDarkMode ? Colors.grey[800] : Colors.white,
                     boxShadow: [
                       BoxShadow(
-                        color: isDarkMode ? Colors.black54 : Colors.black26,
+                        color: isDarkMode
+                            ? Colors.black54
+                            : Color.fromARGB(255, 255, 255, 255),
                         blurRadius: 4,
                       ),
                     ],
@@ -76,7 +80,7 @@ class PostBottomBar extends StatelessWidget {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: settingsProvider.darkMode
-                            ? Colors.grey[800]
+                            ? Color.fromARGB(255, 85, 84, 84)
                             : const Color.fromARGB(255, 221, 128, 244),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -84,7 +88,9 @@ class PostBottomBar extends StatelessWidget {
                       ),
                       child: Text(
                         'Book Now',
-                        style: TextStyle(color: settingsProvider.textColor),
+                        style: TextStyle(color: isDarkMode
+                            ? Colors.white
+                            : Colors.black),
                       ),
                     ),
                   ),
@@ -156,6 +162,8 @@ class _BookingFormDialogState extends State<BookingFormDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final settingsProvider = Provider.of<SettingsModel>(context);
+    final isDarkMode = settingsProvider.darkMode;
     return AlertDialog(
       title: Text("Book a Trip"),
       content: SingleChildScrollView(
@@ -274,17 +282,22 @@ class _BookingFormDialogState extends State<BookingFormDialog> {
         if (!_isLoading)
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text("Cancel"),
+            child: Text("Cancel",style: TextStyle(color: isDarkMode
+                            ? Colors.white
+                            : Colors.black),),
           ),
         if (!_isLoading)
           TextButton(
             onPressed: _saveBooking,
-            child: Text("Book Now"),
+            child: Text("Book Now",  style:TextStyle(color: isDarkMode
+                            ? Colors.white
+                            : Colors.black)),
           ),
       ],
     );
   }
-    Future<void> _saveBooking() async {
+
+  Future<void> _saveBooking() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {

@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:roamify/screens/signup_screen.dart';
+import 'package:roamify/screens/state.dart';
 import 'package:roamify/screens/wrapper.dart';
 
 class LoginPage extends StatefulWidget {
@@ -64,9 +66,14 @@ class _LoginState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final settingsProvider = Provider.of<SettingsModel>(context);
+    final isDarkMode = settingsProvider.darkMode;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Login"),
+        title:  Text("Login", style: TextStyle(color: isDarkMode
+                            ? Colors.white
+                            : Colors.black)),
         backgroundColor: const Color.fromARGB(255, 242, 219, 248),
         centerTitle: true,
       ),
@@ -129,19 +136,29 @@ class _LoginState extends State<LoginPage> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20.0),
                 ),
-                backgroundColor: const Color.fromARGB(255, 242, 219, 248),
+                backgroundColor :isDarkMode
+                            ? const Color.fromARGB(255, 124, 114, 114)
+                            :Color.fromARGB(255, 242, 219, 248),
               ),
               onPressed: _isLoading ? null : signIn,
               child: _isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text("Login"),
+                  :  Text("Login", style: TextStyle(color: isDarkMode
+                            ? Colors.white
+                            : Colors.black)),
             ),
             const SizedBox(height: 20),
             TextButton(
+               style: TextButton.styleFrom(backgroundColor :isDarkMode
+                            ? const Color.fromARGB(255, 124, 114, 114)
+                            :Color.fromARGB(255, 242, 219, 248),),
               onPressed: () => Get.to(() => const SignUp()),
-              child: const Text(
+              child:  Text(
                 "Don't have an account? Sign Up",
-                style: TextStyle(color: Color.fromARGB(255, 221, 128, 244)),
+                style: TextStyle(color: isDarkMode
+                            ? Colors.white
+                            : Colors.black),
+                            
               ),
             ),
           ],

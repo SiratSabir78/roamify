@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:roamify/screens/post_bottom_bar.dart';
 import 'package:roamify/screens/review_screens.dart';
-import 'package:provider/provider.dart';
 import 'package:roamify/screens/favorites_provider.dart';
 import 'package:roamify/screens/state.dart';
 
@@ -26,7 +25,8 @@ class PostScreen extends StatelessWidget {
     final isFavorite = context.watch<FavoritesProvider>().isFavorite(cityName);
 
     final settingsProvider = Provider.of<SettingsModel>(context);
-    final isDarkMode = settingsProvider.darkMode; // Determine dark mode
+    final isDarkMode = settingsProvider.darkMode;
+    final fontSize = settingsProvider.fontSize;
 
     return Scaffold(
       appBar: AppBar(
@@ -34,11 +34,13 @@ class PostScreen extends StatelessWidget {
           cityName,
           style: TextStyle(
             color: isDarkMode ? Colors.white : Colors.black,
+            // Apply font size
           ),
         ),
         backgroundColor: isDarkMode ? Colors.black : Colors.white,
-        iconTheme:
-            IconThemeData(color: isDarkMode ? Colors.white : Colors.black),
+        iconTheme: IconThemeData(
+          color: isDarkMode ? Colors.white : Colors.black,
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -60,7 +62,9 @@ class PostScreen extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0),
                     ),
-                    backgroundColor: const Color.fromARGB(255, 242, 219, 248),
+                    backgroundColor: isDarkMode
+                        ? const Color.fromARGB(255, 73, 73, 73)
+                        : const Color.fromARGB(255, 221, 128, 244),
                   ),
                   onPressed: () {
                     Navigator.push(
@@ -73,7 +77,12 @@ class PostScreen extends StatelessWidget {
                       ),
                     );
                   },
-                  child: const Text('Write a Review'),
+                  child: Text(
+                    'Write a Review',
+                    style: TextStyle(fontSize: fontSize,color: isDarkMode
+                            ? Colors.white
+                            : Colors.black ), // Apply font size
+                  ),
                 ),
                 ElevatedButton(
                   onPressed: () async {
@@ -85,18 +94,26 @@ class PostScreen extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0),
                     ),
-                    backgroundColor: const Color.fromARGB(255, 242, 219, 248),
+                    backgroundColor: isDarkMode
+                        ? const Color.fromARGB(255, 73, 73, 73)
+                        : const Color.fromARGB(255, 221, 128, 244),
                   ),
-                  child: Text(isFavorite
-                      ? 'Remove from Favorites'
-                      : 'Add to Favorites'),
+                  child: Text(
+                    isFavorite ? 'Remove from Favorites' : 'Add to Favorites',
+                    style: TextStyle(
+                        fontSize: fontSize,
+                        color: isDarkMode
+                            ? Colors.white
+                            : Colors.black), // Apply font size
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 20),
             PostBottomBar(
               cityName: cityName,
-              description: description, cityId: cityId,
+              description: description,
+              cityId: cityId,
             ),
           ],
         ),

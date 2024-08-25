@@ -167,7 +167,11 @@ class _ReviewScreenState extends State<ReviewScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Close'),
+              child: Text(
+                'Close',
+                style:
+                    TextStyle(color: _isDarkMode ? Colors.white : Colors.black),
+              ),
             ),
           ],
         );

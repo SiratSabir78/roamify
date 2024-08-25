@@ -1,12 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:roamify/screens/home_screen.dart';
+import 'package:roamify/screens/state.dart';
 
 class TravelInfoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final settingsProvider = Provider.of<SettingsModel>(context);
+    final isDarkMode = settingsProvider.darkMode;
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => HomePage()),
+              (Route<dynamic> route) => false, // Removes all existing routes
+            );
+          },
+        ),
         title: Text('Travel Info'),
-        backgroundColor: const Color.fromARGB(255, 221, 128, 244),
+        backgroundColor:
+            isDarkMode ? Colors.black : const Color.fromRGBO(186, 104, 200, 1),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

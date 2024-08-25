@@ -7,10 +7,10 @@ import 'package:roamify/screens/home_screen.dart';
 import 'package:roamify/screens/state.dart';
 
 class BookingPage extends StatelessWidget {
-  
   @override
   Widget build(BuildContext context) {
     final settingsProvider = Provider.of<SettingsModel>(context);
+    final isDarkMode = settingsProvider.darkMode;
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       return Scaffold(
@@ -126,7 +126,16 @@ class BookingPage extends StatelessWidget {
                                 tripDescription,
                               );
                             },
-                            child: Text('Details'),
+                            child: Text(
+                              'Details',
+                              style: TextStyle(
+                                color: isDarkMode ? Colors.white : Colors.black,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: settingsProvider.darkMode
+                                    ? Color.fromARGB(76, 78, 78, 78)
+                                    : const Color.fromARGB(255, 221, 128, 244)),
                           ),
                           SizedBox(width: 8),
                           ElevatedButton(
@@ -138,13 +147,14 @@ class BookingPage extends StatelessWidget {
                               }
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: settingsProvider.darkMode
-                                  ? Colors.grey[800]
-                                  : Colors.grey[300],
-                            ),
+                                backgroundColor: settingsProvider.darkMode
+                                    ? const Color.fromARGB(76, 78, 78, 78)
+                                    : const Color.fromARGB(255, 221, 128, 244)),
                             child: Text(
                               'Remove',
-                              style: TextStyle(color: Colors.black),
+                              style: TextStyle(
+                                color: isDarkMode ? Colors.white : Colors.black,
+                              ),
                             ),
                           ),
                         ],

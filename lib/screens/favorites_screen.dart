@@ -97,7 +97,14 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                         : const Color.fromARGB(255, 221, 128, 244),
                     textStyle: TextStyle(fontSize: settings.fontSize),
                   ),
-                  child: Text('Remove'),
+                  child: Text(
+                    'Remove',
+                    style: TextStyle(
+                      color: settings.darkMode
+                          ? const Color.fromARGB(255, 255, 255, 255)
+                          : Colors.black,
+                    ),
+                  ),
                 ),
                 onTap: () {
                   WelcomeScreen();

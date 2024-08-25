@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; // Import provider package
+import 'package:roamify/screens/home_screen.dart';
 import 'package:roamify/screens/state.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -246,6 +247,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => HomePage()),
+              (Route<dynamic> route) => false, // Removes all existing routes
+            );
+          },
+        ),
         title: Text('Profile Settings'),
         backgroundColor: settings.darkMode
             ? Colors.black
