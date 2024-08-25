@@ -12,7 +12,7 @@ class SettingsScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           'Settings',
-         
+        
         ),
         backgroundColor: settings.darkMode
             ? Colors.black
