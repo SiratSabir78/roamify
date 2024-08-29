@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             brightness: settings.darkMode ? Brightness.dark : Brightness.light,
             textTheme: TextTheme(
-              bodyText2: TextStyle(fontSize: settings.fontSize),
+              bodyMedium: TextStyle(fontSize: settings.fontSize),
             ),
           ),
           home: Wrapper(),

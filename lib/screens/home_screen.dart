@@ -331,7 +331,7 @@ class _HomeContentState extends State<HomeContent> {
                                             ElevatedButton(
                                               onPressed: () {
                                                 _showBookingDialog(
-                                                    context, city['name']);
+                                                    context, city['cityId']);
                                               },
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor:
@@ -432,63 +432,61 @@ class _HomeContentState extends State<HomeContent> {
   }
 }
 
-  Future<void> _toggleFavorite(BuildContext context, String cityName) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('You need to be logged in to add favorites'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      return;
-    }
-
-    final userDoc =
-        FirebaseFirestore.instance.collection('users').doc(user.uid);
-    final isFavorite = context.read<FavoritesProvider>().isFavorite(cityName);
-
-    try {
-      if (isFavorite) {
-        await userDoc.update({
-          'favoriteCities': FieldValue.arrayRemove([cityName])
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Removed from your favorites'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      } else {
-        await userDoc.update({
-          'favoriteCities': FieldValue.arrayUnion([cityName])
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Added to your favorites'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-
-      // Update the local favorites state
-      context.read<FavoritesProvider>().toggleFavorite(cityName);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error updating favorites'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
+Future<void> _toggleFavorite(BuildContext context, String cityName) async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('You need to be logged in to add favorites'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+    return;
   }
 
-  void _showBookingDialog(BuildContext context, String cityId) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return BookingFormDialog(cityId: cityId);
-      },
+  final userDoc = FirebaseFirestore.instance.collection('users').doc(user.uid);
+  final isFavorite = context.read<FavoritesProvider>().isFavorite(cityName);
+
+  try {
+    if (isFavorite) {
+      await userDoc.update({
+        'favoriteCities': FieldValue.arrayRemove([cityName])
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Removed from your favorites'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } else {
+      await userDoc.update({
+        'favoriteCities': FieldValue.arrayUnion([cityName])
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Added to your favorites'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+
+    // Update the local favorites state
+    context.read<FavoritesProvider>().toggleFavorite(cityName);
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error updating favorites'),
+        duration: Duration(seconds: 2),
+      ),
     );
   }
+}
 
+void _showBookingDialog(BuildContext context, String cityId) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return BookingFormDialog(cityId: cityId);
+    },
+  );
+}

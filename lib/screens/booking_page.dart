@@ -266,7 +266,7 @@ class BookingPage extends StatelessWidget {
             children: [
               Text(
                 'City Name: $cityName',
-                style: Theme.of(context).textTheme.headline6,
+                style: Theme.of(context).textTheme.titleLarge,
               ),
               SizedBox(height: 8),
               Text(
@@ -317,6 +317,7 @@ class _BookingFormDialogState extends State<BookingFormDialog> {
   bool _isLoading = false;
   String _tripDescription = '';
   double _pricePerDay = 0.0;
+  String _name = '';
 
   @override
   void initState() {
@@ -335,6 +336,7 @@ class _BookingFormDialogState extends State<BookingFormDialog> {
         setState(() {
           _pricePerDay = citySnapshot['price']?.toDouble() ?? 0.0;
           _tripDescription = citySnapshot['data'] ?? '';
+          _name = citySnapshot['name'];
           _updateTotalPrice();
         });
       }
@@ -501,6 +503,7 @@ class _BookingFormDialogState extends State<BookingFormDialog> {
         'userId': FirebaseAuth.instance.currentUser!.uid,
         'numberOfUsers': _numberOfUsers,
         'price': _totalPrice,
+        'name': _name,
       };
 
       await FirebaseFirestore.instance

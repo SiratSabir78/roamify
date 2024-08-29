@@ -150,7 +150,8 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
           content: Text(
             'You need to be logged in to remove favorites',
             style: TextStyle(
-                fontSize: Provider.of<SettingsModel>(context).fontSize),
+                fontSize: Provider.of<SettingsModel>(context, listen: false)
+                    .fontSize),
           ),
           duration: Duration(seconds: 2),
         ),
@@ -171,7 +172,8 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
           content: Text(
             'Removed from your favorites',
             style: TextStyle(
-                fontSize: Provider.of<SettingsModel>(context).fontSize),
+                fontSize: Provider.of<SettingsModel>(context, listen: false)
+                    .fontSize),
           ),
           duration: Duration(seconds: 2),
         ),
@@ -182,7 +184,8 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
           content: Text(
             'Error removing from favorites',
             style: TextStyle(
-                fontSize: Provider.of<SettingsModel>(context).fontSize),
+                fontSize: Provider.of<SettingsModel>(context, listen: false)
+                    .fontSize),
           ),
           duration: Duration(seconds: 2),
         ),

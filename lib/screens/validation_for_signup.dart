@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 Future<String?> validateUsername(String? value) async {
   if (value == null || value.isEmpty) {
     return 'Please enter your username';
@@ -15,11 +16,8 @@ Future<String?> validateUsername(String? value) async {
     return 'Username already taken';
   }
 
-  return null; 
+  return null;
 }
-
-
-
 
 String? validateEmail(String? value) {
   if (value == null || value.isEmpty) {
