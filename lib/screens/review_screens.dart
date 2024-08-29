@@ -93,7 +93,9 @@ class _ReviewPageState extends State<ReviewPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Write a Review', style: TextStyle(fontSize: fontSize)),
-        backgroundColor: isDarkMode ? Colors.grey[850] : Colors.purple[300],
+        backgroundColor: isDarkMode
+            ? Colors.grey[850]
+            : const Color.fromRGBO(186, 104, 200, 1),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
@@ -118,7 +120,9 @@ class _ReviewPageState extends State<ReviewPage> {
               max: 5,
               divisions: 5,
               label: _rating.toString(),
-              activeColor: isDarkMode ? const Color.fromARGB(255, 221, 128, 244) : const Color.fromARGB(255, 221, 128, 244),
+              activeColor: isDarkMode
+                  ? const Color.fromARGB(255, 221, 128, 244)
+                  : const Color.fromARGB(255, 221, 128, 244),
               inactiveColor: isDarkMode ? Colors.grey[700] : Colors.grey[400],
             ),
             const SizedBox(height: 20),
@@ -154,12 +158,16 @@ class _ReviewPageState extends State<ReviewPage> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20.0),
                 ),
-                backgroundColor:
-                    isDarkMode ? const Color.fromARGB(255, 221, 128, 244) : Color.fromRGBO(255, 221, 128, 244),
+                backgroundColor: isDarkMode
+                    ? Color.fromRGBO(77, 76, 74, 0.047)
+                    : const Color.fromRGBO(186, 104, 200, 1),
               ),
               onPressed: submitReview,
-              child:
-                  Text('Submit Review', style: TextStyle(fontSize: fontSize)),
+              child: Text('Submit Review',
+                  style: TextStyle(
+                    fontSize: fontSize,
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  )),
             ),
             const SizedBox(height: 20),
             StreamBuilder<QuerySnapshot>(

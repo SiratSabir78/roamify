@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:roamify/screens/signup_screen.dart';
+import 'package:roamify/screens/state.dart';
 import 'package:roamify/screens/wrapper.dart';
 
 class LoginPage extends StatefulWidget {
@@ -19,6 +21,7 @@ class _LoginState extends State<LoginPage> {
   bool _isLoading = false;
   String? _emailError;
   String? _passwordError;
+  bool _obscurePassword = true; // For toggling password visibility
 
   Future<void> signIn() async {
     setState(() {
@@ -32,27 +35,25 @@ class _LoginState extends State<LoginPage> {
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
-      // If the user is successfully signed in, navigate to the Wrapper screen
       if (_auth.currentUser != null) {
         Get.offAll(() => Wrapper());
       }
     } on FirebaseAuthException catch (e) {
-      // Handle specific Firebase authentication exceptions
       setState(() {
-        switch (e.code) {
-          case 'invalid-credential':
-          case 'invalid-email':
-            _emailError = 'Please enter a valid email address.';
-            break;
-          case 'wrong-password':
-            _passwordError = 'Incorrect password. Please try again.';
-            break;
-          default:
-            _emailError = 'An unknown error occurred. Please try again.';
+        if (e.code == 'invalid-credential') {
+          _passwordError =
+              'Invalid credentials. Please check your email and password.';
+        } else if (e.code == 'invalid-email') {
+          _emailError = 'Please enter a valid email address.';
+        } else if (e.code == 'wrong-password') {
+          _passwordError = 'Incorrect password. Please try again.';
+        } else if (e.code == 'too-many-requests') {
+          _emailError = 'Too many requests! Please try again later.';
+        } else {
+          _emailError = 'An unknown error occurred. Please try again.';
         }
       });
     } catch (e) {
-      // Handle any other exceptions
       setState(() {
         _emailError = 'An unexpected error occurred: ${e.toString()}';
       });
@@ -65,9 +66,14 @@ class _LoginState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final settingsProvider = Provider.of<SettingsModel>(context);
+    final isDarkMode = settingsProvider.darkMode;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Login"),
+        title:  Text("Login", style: TextStyle(color: isDarkMode
+                            ? Colors.white
+                            : Colors.black)),
         backgroundColor: const Color.fromARGB(255, 242, 219, 248),
         centerTitle: true,
       ),
@@ -102,7 +108,7 @@ class _LoginState extends State<LoginPage> {
             const SizedBox(height: 15),
             TextField(
               controller: passwordController,
-              obscureText: true,
+              obscureText: _obscurePassword, // Obscure or reveal password
               decoration: InputDecoration(
                 hintText: 'Enter Password',
                 prefixIcon: const Icon(Icons.lock),
@@ -110,6 +116,16 @@ class _LoginState extends State<LoginPage> {
                   borderRadius: BorderRadius.circular(20.0),
                 ),
                 errorText: _passwordError,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 40),
@@ -120,19 +136,29 @@ class _LoginState extends State<LoginPage> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20.0),
                 ),
-                backgroundColor: const Color.fromARGB(255, 242, 219, 248),
+                backgroundColor :isDarkMode
+                            ? const Color.fromARGB(255, 124, 114, 114)
+                            :Color.fromARGB(255, 242, 219, 248),
               ),
               onPressed: _isLoading ? null : signIn,
               child: _isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text("Login"),
+                  :  Text("Login", style: TextStyle(color: isDarkMode
+                            ? Colors.white
+                            : Colors.black)),
             ),
             const SizedBox(height: 20),
             TextButton(
+               style: TextButton.styleFrom(backgroundColor :isDarkMode
+                            ? const Color.fromARGB(255, 124, 114, 114)
+                            :Color.fromARGB(255, 242, 219, 248),),
               onPressed: () => Get.to(() => const SignUp()),
-              child: const Text(
+              child:  Text(
                 "Don't have an account? Sign Up",
-                style: TextStyle(color: Color.fromARGB(255, 221, 128, 244)),
+                style: TextStyle(color: isDarkMode
+                            ? Colors.white
+                            : Colors.black),
+                            
               ),
             ),
           ],

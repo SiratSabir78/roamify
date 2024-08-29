@@ -5,7 +5,9 @@ import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:roamify/screens/login_screen.dart';
+import 'package:roamify/screens/state.dart';
 import 'package:roamify/screens/validation_for_signup.dart';
 
 class SignUp extends StatefulWidget {
@@ -120,10 +122,20 @@ class _SignUpState extends State<SignUp> {
 
   @override
   Widget build(BuildContext context) {
+    final settingsProvider = Provider.of<SettingsModel>(context);
+    final isDarkMode = settingsProvider.darkMode;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Sign Up"),
-        backgroundColor: const Color.fromARGB(255, 242, 219, 248),
+        title: Text(
+          "Sign Up",
+          style: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
+        ),
+        backgroundColor: isDarkMode
+            ? Colors.black
+            : const Color.fromARGB(255, 242, 219, 248),
         centerTitle: true,
       ),
       body: Stack(
@@ -241,19 +253,31 @@ class _SignUpState extends State<SignUp> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20.0),
                           ),
-                          backgroundColor:
-                              const Color.fromARGB(255, 242, 219, 248),
+                          backgroundColor: isDarkMode
+                              ? Color.fromARGB(255, 79, 77, 80)
+                              : Color.fromARGB(255, 242, 219, 248),
                         ),
                         onPressed: signup,
-                        child: const Text("Sign Up"),
+                        child: Text(
+                          "Sign Up",
+                          style: TextStyle(
+                            color: isDarkMode ? Colors.white : Colors.black,
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 20),
                       TextButton(
-                        onPressed: () => Get.off(() => LoginPage()),
-                        child: const Text(
+                        style: TextButton.styleFrom(
+                          backgroundColor: isDarkMode
+                              ? Color.fromARGB(255, 78, 77, 77)
+                              : Color.fromARGB(255, 242, 219, 248),
+                        ),
+                        onPressed: () => Get.to(() => const LoginPage()),
+                        child: Text(
                           "Already have an account? Login",
                           style: TextStyle(
-                              color: Color.fromARGB(255, 221, 128, 244)),
+                            color: isDarkMode ? Colors.white : Colors.black,
+                          ),
                         ),
                       ),
                     ],
