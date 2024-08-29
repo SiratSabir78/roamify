@@ -249,7 +249,7 @@ class _SignUpState extends State<SignUp> {
                       ),
                       const SizedBox(height: 20),
                       TextButton(
-                        onPressed: () => Get.to(() => const LoginPage()),
+                        onPressed: () => Get.off(() => LoginPage()),
                         child: const Text(
                           "Already have an account? Login",
                           style: TextStyle(
